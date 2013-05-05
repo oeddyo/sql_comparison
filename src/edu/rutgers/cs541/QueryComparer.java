@@ -141,18 +141,18 @@ public class QueryComparer {
 
 		@Override
 		protected ReturnValue doInBackground() throws Exception {
-			mStatement.execute("DROP ALL OBJECTS");
-			RunScript.execute(mConnection, new StringReader(mSchema));
-			for (int t = 0; t < mTableNames.size(); t++) {
-				for (int i = 0; i < mSolution.get(t).size(); i++) {
-					System.out.println(mSolution.get(t).get(i));
-					try {
-						mStatement.executeUpdate(mSolution.get(t).get(i));
-					} catch (SQLException e) {
-						System.out.println(e);
-					}
-				}
-			}
+			// mStatement.execute("DROP ALL OBJECTS");
+			// RunScript.execute(mConnection, new StringReader(mSchema));
+			// for (int t = 0; t < mTableNames.size(); t++) {
+			// for (int i = 0; i < mSolution.get(t).size(); i++) {
+			// System.out.println(mSolution.get(t).get(i));
+			// try {
+			// mStatement.executeUpdate(mSolution.get(t).get(i));
+			// } catch (SQLException e) {
+			// System.out.println(e);
+			// }
+			// }
+			// }
 			DBOperation dbp = new DBOperation();
 			mSolution = dbp.minimizeSolution(mSolution, mTableNames,
 					mStatement, mQuery1, mQuery2);
