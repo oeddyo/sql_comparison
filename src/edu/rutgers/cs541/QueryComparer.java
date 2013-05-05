@@ -42,7 +42,9 @@ public class QueryComparer {
 	private Worker mWorker;
 	private Vector<String> mTableNames;
 	private Vector<Vector<String>> mSolution;
-	private boolean mIsMinimize;
+	private String mSchema;
+	private String mQuery1;
+	private String mQuery2;
 
 	/**
 	 * Loads the H2 Driver and initializes a database
@@ -124,23 +126,35 @@ public class QueryComparer {
 	}
 
 	public SwingWorker<ReturnValue, Object> getCompareWorker(String schema,
-			String query1, String query2, boolean isMinimize) {
+			String query1, String query2) {
 		mWorker = new Worker(schema, query1, query2);
-		mIsMinimize = isMinimize;
 		return mWorker;
 	}
 
-	public SwingWorker<ReturnValue, Object> minimizeSolution() {
-		return mWorker;
-
+	public SwingWorker<ReturnValue, Object> getMinimizeWorker() {
+		return new MinimizeWorker();
 	}
 
 	/**
 	 * This class that will be returned by getCompareWorker()
 	 */
-	private class SchemaWorker extends SwingWorker<ReturnValue, Object> {
-		private String mSchema;
+	private class MinimizeWorker extends SwingWorker<ReturnValue, Object> {
 
+		public MinimizeWorker() {
+		}
+
+		@Override
+		protected ReturnValue doInBackground() throws Exception {
+			mStatement.execute("DROP ALL OBJECTS");
+			RunScript.execute(mConnection, new StringReader(mSchema));
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
+			return new ReturnValue(Code.SUCCESS, outputStream.toString());
+
+		}
+	}
+
+	private class SchemaWorker extends SwingWorker<ReturnValue, Object> {
 		public SchemaWorker(String schema) {
 			mSchema = schema;
 		}
@@ -156,9 +170,6 @@ public class QueryComparer {
 	}
 
 	private class Worker extends SwingWorker<ReturnValue, Object> {
-		private String mSchema;
-		private String mQuery1;
-		private String mQuery2;
 
 		/**
 		 * Constructor for our Worker
@@ -267,10 +278,6 @@ public class QueryComparer {
 					}
 				}
 				mSolution = solution;
-				if (mIsMinimize) {
-					mSolution = dbp.minimizeSolution(mSolution, mTableNames,
-							mStatement, mQuery1, mQuery2);
-				}
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
 				return new ReturnValue(Code.SUCCESS, outputStream.toString());
