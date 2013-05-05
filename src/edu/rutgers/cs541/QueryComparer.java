@@ -119,6 +119,10 @@ public class QueryComparer {
 	 *            - 2nd of two SQL queries to test for differences
 	 * @return a SwingWorker which can be executed by a worker thread
 	 */
+	public SwingWorker<ReturnValue, Object> getCreateSchemaWorker(String schema) {
+		return new SchemaWorker(schema);
+	}
+
 	public SwingWorker<ReturnValue, Object> getCompareWorker(String schema,
 			String query1, String query2, boolean isMinimize) {
 		mWorker = new Worker(schema, query1, query2);
@@ -134,6 +138,23 @@ public class QueryComparer {
 	/**
 	 * This class that will be returned by getCompareWorker()
 	 */
+	private class SchemaWorker extends SwingWorker<ReturnValue, Object> {
+		private String mSchema;
+
+		public SchemaWorker(String schema) {
+			mSchema = schema;
+		}
+
+		@Override
+		protected ReturnValue doInBackground() throws Exception {
+			mStatement.execute("DROP ALL OBJECTS");
+			RunScript.execute(mConnection, new StringReader(mSchema));
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
+			return new ReturnValue(Code.SUCCESS, outputStream.toString());
+		}
+	}
+
 	private class Worker extends SwingWorker<ReturnValue, Object> {
 		private String mSchema;
 		private String mQuery1;

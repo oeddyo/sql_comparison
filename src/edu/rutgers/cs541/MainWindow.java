@@ -1,11 +1,14 @@
 package edu.rutgers.cs541;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -13,20 +16,11 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.SwingWorker.StateValue;
-
-import edu.rutgers.cs541.ReturnValue.Code;
-
-
-import java.awt.Color;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.swing.JFrame;
-import javax.swing.JTextPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -35,7 +29,7 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-
+import edu.rutgers.cs541.ReturnValue.Code;
 
 /**
  * This class is the main form that will be visible to the user
@@ -112,7 +106,8 @@ public class MainWindow {
 
 		mQuery1TextArea = new JTextPane();
 		mQuery1Label.setLabelFor(mQuery1TextArea);
-		mQuery1TextArea.getDocument().addDocumentListener(new SyntaxHighlighter(mQuery1TextArea));
+		mQuery1TextArea.getDocument().addDocumentListener(
+				new SyntaxHighlighter(mQuery1TextArea));
 
 		mQuery1TextArea.setBounds(22, 215, 350, 225);
 
@@ -127,7 +122,8 @@ public class MainWindow {
 		mQuery2TextArea = new JTextPane();
 		mQuery2Label.setLabelFor(mQuery2TextArea);
 		mQuery2TextArea.setBounds(22, 215, 350, 225);
-		mQuery2TextArea.getDocument().addDocumentListener(new SyntaxHighlighter(mQuery2TextArea));
+		mQuery2TextArea.getDocument().addDocumentListener(
+				new SyntaxHighlighter(mQuery2TextArea));
 
 		JScrollPane query2TextAreaScrollPane = new JScrollPane(mQuery2TextArea);
 
@@ -369,16 +365,16 @@ public class MainWindow {
 		mMonteCarloQueryForm.setVisible(visible);
 	}
 
-	
-	
 	class SyntaxHighlighter implements DocumentListener {
 		private Set<String> keywords;
 		private Style keywordStyle;
 		private Style normalStyle;
 
 		public SyntaxHighlighter(JTextPane editor) {
-			keywordStyle = ((StyledDocument) editor.getDocument()).addStyle("Keyword_Style", null);
-			normalStyle = ((StyledDocument) editor.getDocument()).addStyle("Keyword_Style", null);
+			keywordStyle = ((StyledDocument) editor.getDocument()).addStyle(
+					"Keyword_Style", null);
+			normalStyle = ((StyledDocument) editor.getDocument()).addStyle(
+					"Keyword_Style", null);
 			StyleConstants.setForeground(keywordStyle, Color.RED);
 			StyleConstants.setForeground(normalStyle, Color.BLACK);
 			keywords = new HashSet<String>();
@@ -401,8 +397,14 @@ public class MainWindow {
 			keywords.add("null");
 			keywords.add("column");
 			keywords.add("distinct");
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2f112920cafe31e930da09a62c873a8525a9d6ae
 		}
-		public void colouring(StyledDocument doc, int pos, int len) throws BadLocationException {
+
+		public void colouring(StyledDocument doc, int pos, int len)
+				throws BadLocationException {
 			int start = indexOfWordStart(doc, pos);
 			int end = indexOfWordEnd(doc, pos + len);
 
@@ -412,43 +414,56 @@ public class MainWindow {
 				if (Character.isLetter(ch) || ch == '_') {
 					start = colouringWord(doc, start);
 				} else {
-					SwingUtilities.invokeLater(new ColouringTask(doc, start, 1, normalStyle));
+					SwingUtilities.invokeLater(new ColouringTask(doc, start, 1,
+							normalStyle));
 					++start;
 				}
 			}
 		}
 
-		public int colouringWord(StyledDocument doc, int pos) throws BadLocationException {
+		public int colouringWord(StyledDocument doc, int pos)
+				throws BadLocationException {
 			int wordEnd = indexOfWordEnd(doc, pos);
 			String word = doc.getText(pos, wordEnd - pos);
 
 			if (keywords.contains(word)) {
-				SwingUtilities.invokeLater(new ColouringTask(doc, pos, wordEnd - pos, keywordStyle));
+				SwingUtilities.invokeLater(new ColouringTask(doc, pos, wordEnd
+						- pos, keywordStyle));
 			} else {
-				SwingUtilities.invokeLater(new ColouringTask(doc, pos, wordEnd - pos, normalStyle));
+				SwingUtilities.invokeLater(new ColouringTask(doc, pos, wordEnd
+						- pos, normalStyle));
 			}
 
 			return wordEnd;
 		}
-		public char getCharAt(Document doc, int pos) throws BadLocationException {
+
+		public char getCharAt(Document doc, int pos)
+				throws BadLocationException {
 			return doc.getText(pos, 1).charAt(0);
 		}
-		public int indexOfWordStart(Document doc, int pos) throws BadLocationException {
-			// 从pos开始向前找到第一个非单词字符.
-			for (; pos > 0 && isWordCharacter(doc, pos - 1); --pos);
+
+		public int indexOfWordStart(Document doc, int pos)
+				throws BadLocationException {
+			for (; pos > 0 && isWordCharacter(doc, pos - 1); --pos)
+				;
 
 			return pos;
 		}
 
-		public int indexOfWordEnd(Document doc, int pos) throws BadLocationException {
-			// 从pos开始向前找到第一个非单词字符.
-			for (; isWordCharacter(doc, pos); ++pos);
+		public int indexOfWordEnd(Document doc, int pos)
+				throws BadLocationException {
+			for (; isWordCharacter(doc, pos); ++pos)
+				;
 
 			return pos;
 		}
-		public boolean isWordCharacter(Document doc, int pos) throws BadLocationException {
+
+		public boolean isWordCharacter(Document doc, int pos)
+				throws BadLocationException {
 			char ch = getCharAt(doc, pos);
-			if (Character.isLetter(ch) || Character.isDigit(ch) || ch == '_') { return true; }
+			if (Character.isLetter(ch) || Character.isDigit(ch) || ch == '_') {
+				return true;
+			}
 			return false;
 		}
 
@@ -460,7 +475,8 @@ public class MainWindow {
 		@Override
 		public void insertUpdate(DocumentEvent e) {
 			try {
-				colouring((StyledDocument) e.getDocument(), e.getOffset(), e.getLength());
+				colouring((StyledDocument) e.getDocument(), e.getOffset(),
+						e.getLength());
 			} catch (BadLocationException e1) {
 				e1.printStackTrace();
 			}
@@ -469,19 +485,20 @@ public class MainWindow {
 		@Override
 		public void removeUpdate(DocumentEvent e) {
 			try {
-				// 因为删除后光标紧接着影响的单词两边, 所以长度就不需要了
 				colouring((StyledDocument) e.getDocument(), e.getOffset(), 0);
 			} catch (BadLocationException e1) {
 				e1.printStackTrace();
 			}
 		}
+
 		private class ColouringTask implements Runnable {
 			private StyledDocument doc;
 			private Style style;
 			private int pos;
 			private int len;
 
-			public ColouringTask(StyledDocument doc, int pos, int len, Style style) {
+			public ColouringTask(StyledDocument doc, int pos, int len,
+					Style style) {
 				this.doc = doc;
 				this.pos = pos;
 				this.len = len;
@@ -490,9 +507,9 @@ public class MainWindow {
 
 			public void run() {
 				try {
-					// 这里就是对字符进行着色
 					doc.setCharacterAttributes(pos, len, style, true);
-				} catch (Exception e) {}
+				} catch (Exception e) {
+				}
 			}
 		}
 	}
