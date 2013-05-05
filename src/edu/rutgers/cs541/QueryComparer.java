@@ -139,14 +139,11 @@ public class QueryComparer {
 	 */
 	private class MinimizeWorker extends SwingWorker<ReturnValue, Object> {
 
-		public MinimizeWorker() {
-		}
-
 		@Override
 		protected ReturnValue doInBackground() throws Exception {
 			mStatement.execute("DROP ALL OBJECTS");
 			RunScript.execute(mConnection, new StringReader(mSchema));
-
+			System.out.println(mSchema);
 			DBOperation dbp = new DBOperation();
 			for (int t = 0; t < mTableNames.size(); t++) {
 				for (int i = 0; i < mSolution.get(t).size(); i++) {
@@ -154,7 +151,8 @@ public class QueryComparer {
 					tuple.append(mSolution.get(t).get(i));
 					StringBuilder insertSb = dbp.generateInsertStatement(tuple,
 							mTableNames.get(t));
-
+					System.out.println(mTableNames.get(t));
+					System.out.println(tuple);
 					try {
 						mStatement.executeUpdate(insertSb.toString());
 					} catch (SQLException e) {
@@ -178,6 +176,14 @@ public class QueryComparer {
 		protected ReturnValue doInBackground() throws Exception {
 			mStatement.execute("DROP ALL OBJECTS");
 			RunScript.execute(mConnection, new StringReader(mSchema));
+			ResultSet rsTab = mStatement.executeQuery("SELECT table_name "
+					+ "FROM information_schema.tables "
+					+ "WHERE table_schema = 'PUBLIC'");
+			mTableNames = new Vector<String>();
+			while (rsTab.next()) {
+				// note that column indexing starts from 1
+				mTableNames.add(rsTab.getString(1));
+			}
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
 			return new ReturnValue(Code.SUCCESS, outputStream.toString());
