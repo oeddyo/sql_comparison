@@ -10,6 +10,7 @@ import java.io.StringWriter;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
@@ -48,7 +49,7 @@ public class MainWindow {
 
 	// a handle for any worker that is executing
 	private SwingWorker<ReturnValue, Object> mCurrentWorker;
-
+	
 	// this instance of a listener will be called when the
 	// worker finished execution
 	private QueryCompareListener mCompareListener = new QueryCompareListener();
@@ -67,6 +68,10 @@ public class MainWindow {
 	private JTextArea mOutputTextArea;
 	private JButton mStartButton;
 	private JButton mCancelButton;
+	private JButton mStartMinimalButton;
+	private JButton mCreateSchema;
+
+	private JList mTableList;
 
 	/**
 	 * Create the application.
@@ -134,10 +139,10 @@ public class MainWindow {
 		mStartButton.setBounds(150, 453, 122, 25);
 		mMonteCarloQueryForm.getContentPane().add(mStartButton);
 
-		mStartButton = new JButton("Start Minimal Analysis");
-		mStartButton.addActionListener(new StartMinimalActionListener());
-		mStartButton.setBounds(300, 453, 122, 25);
-		mMonteCarloQueryForm.getContentPane().add(mStartButton);
+		mStartMinimalButton = new JButton("Start Minimal Analysis");
+		mStartMinimalButton.addActionListener(new StartMinimalActionListener());
+		mStartMinimalButton.setBounds(300, 453, 122, 25);
+		mMonteCarloQueryForm.getContentPane().add(mStartMinimalButton);
 
 		mCancelButton = new JButton("Cancel");
 		mCancelButton.setBounds(450, 453, 97, 25);
@@ -145,6 +150,10 @@ public class MainWindow {
 		mCancelButton.setEnabled(false);
 		mMonteCarloQueryForm.getContentPane().add(mCancelButton);
 
+		mCreateSchema = new JButton("create schema");
+		mCreateSchema.setBounds(455,455,98,28);
+		
+		
 		mOutputTextArea = new JTextArea();
 		mOutputTextArea.setEditable(false);
 		mOutputTextArea.setBounds(22, 506, 720, 150);
@@ -157,6 +166,16 @@ public class MainWindow {
 		mOutputLabel.setBounds(22, 486, 104, 16);
 		mMonteCarloQueryForm.getContentPane().add(mOutputLabel);
 
+		
+		/*
+		mTableList = new JList();
+		String[] listTables = { "table1", "table2", "table3" };
+		mTableList.setSelectedIndex(0);
+		mTableList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		*/
+
+		
+		
 		// initialize the QueryComparer (& H2 DB)
 		mQueryComparer = new QueryComparer();
 		ReturnValue rv = mQueryComparer.init();
@@ -173,10 +192,36 @@ public class MainWindow {
 	 * 
 	 */
 
+	private class CreateSchema implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			// prevent the user from clicking start again
+			mStartMinimalButton.setEnabled(false);
+			// clear any old output
+			mOutputTextArea.setText("");
+
+			// get the schema and queries from their respective textboxes
+			String schema = mSchemaTextArea.getText();
+			mCurrentWorker = mQueryComparer.createSchema( schema);
+			
+			// create a worker to test these user inputs
+			//mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
+			//		query2, true);
+
+			// set the callback (PropertyChangeListener) for the worker
+			mCurrentWorker.addPropertyChangeListener(mCompareListener);
+
+			// start the worker (executes on a worker thread)
+			mCurrentWorker.execute();
+
+			// allow the user to click the cancel button
+			mCancelButton.setEnabled(true);
+		}
+	}
+
 	private class StartMinimalActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// prevent the user from clicking start again
-			mStartButton.setEnabled(false);
+			mStartMinimalButton.setEnabled(false);
 			// clear any old output
 			mOutputTextArea.setText("");
 
@@ -356,8 +401,6 @@ public class MainWindow {
 			keywords.add("null");
 			keywords.add("column");
 			keywords.add("distinct");
-
-			
 		}
 		public void colouring(StyledDocument doc, int pos, int len) throws BadLocationException {
 			int start = indexOfWordStart(doc, pos);
