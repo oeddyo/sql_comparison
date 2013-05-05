@@ -157,7 +157,7 @@ public class QueryComparer {
 						mStatement.executeUpdate(insertSb.toString());
 					} catch (SQLException e) {
 						System.out
-								.println("Error: cannot insert tuples into db.");
+								.println(e);
 					}
 				}
 			}
