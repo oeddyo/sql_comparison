@@ -1,7 +1,3 @@
-// Copyright
-// Chaolun Xia & Ke Xie
-// For CS541 DB
-
 package edu.rutgers.cs541;
 
 import java.sql.ResultSet;
