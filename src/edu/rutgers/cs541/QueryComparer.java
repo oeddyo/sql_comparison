@@ -41,7 +41,7 @@ public class QueryComparer {
 	private Statement mStatement = null;
 	private Worker mWorker;
 	private Vector<String> mTableNames;
-	// private Vector<Vector<String>> mFirstSolution;
+	private Vector<Vector<String>> mSolution;
 	private boolean mIsMinimize;
 
 	/**
@@ -52,6 +52,21 @@ public class QueryComparer {
 	 * @return a ReturnValue with a text reason on failure, an exception may
 	 *         also be returned in the return value
 	 */
+
+	public Vector<String> getAllTableNames() {
+		return mTableNames;
+	}
+
+	public Vector<String> getAllTuplesFromTable(String table) {
+		for (int i = 0; i < mTableNames.size(); i++) {
+			if (table.equals(mTableNames.get(i))) {
+				return mSolution.get(i);
+			}
+
+		}
+		return mSolution.lastElement();
+	}
+
 	public ReturnValue init() {
 
 		// make sure it was not already called
@@ -230,9 +245,9 @@ public class QueryComparer {
 						solution.add(insertedTuples);
 					}
 				}
-				// mFirstSolution = solution;
+				mSolution = solution;
 				if (mIsMinimize) {
-					solution = dbp.minimizeSolution(solution, mTableNames,
+					mSolution = dbp.minimizeSolution(mSolution, mTableNames,
 							mStatement, mQuery1, mQuery2);
 				}
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
