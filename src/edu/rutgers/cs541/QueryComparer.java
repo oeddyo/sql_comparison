@@ -147,6 +147,23 @@ public class QueryComparer {
 		protected ReturnValue doInBackground() throws Exception {
 			mStatement.execute("DROP ALL OBJECTS");
 			RunScript.execute(mConnection, new StringReader(mSchema));
+
+			DBOperation dbp = new DBOperation();
+			for (int t = 0; t < mTableNames.size(); t++) {
+				for (int i = 0; i < mSolution.get(t).size(); i++) {
+					StringBuilder tuple = new StringBuilder();
+					tuple.append(mSolution.get(t).get(i));
+					StringBuilder insertSb = dbp.generateInsertStatement(tuple,
+							mTableNames.get(t));
+
+					try {
+						mStatement.executeUpdate(insertSb.toString());
+					} catch (SQLException e) {
+						System.out
+								.println("Error: cannot insert tuples into db.");
+					}
+				}
+			}
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
 			return new ReturnValue(Code.SUCCESS, outputStream.toString());
