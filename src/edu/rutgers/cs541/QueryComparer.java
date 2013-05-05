@@ -126,8 +126,8 @@ public class QueryComparer {
 
 	public SwingWorker<ReturnValue, Object> getCompareWorker(String schema,
 			String query1, String query2) {
-		mWorker = new Worker(schema, query1, query2);
-		return mWorker;
+		return new Worker(schema, query1, query2);
+
 	}
 
 	public SwingWorker<ReturnValue, Object> getMinimizeWorker() {
