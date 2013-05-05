@@ -158,7 +158,6 @@ public class MainWindow {
 
 		
 		mCreateSchema = new JButton("create schema");
-<<<<<<< HEAD
 		mCreateSchema.setBounds(550,453,97,25);
 		mCreateSchema.addActionListener(new CreateSchema());
 		mCreateSchema.setEnabled(true);
@@ -166,10 +165,6 @@ public class MainWindow {
 
 		
 		
-=======
-		mCreateSchema.setBounds(455, 455, 98, 28);
-
->>>>>>> e259fc4420d134cfa4db5e7d914925d45771b294
 		mOutputTextArea = new JTextArea();
 		mOutputTextArea.setEditable(false);
 		mOutputTextArea.setBounds(22, 506, 500, 150);
@@ -182,7 +177,7 @@ public class MainWindow {
 		mOutputLabel.setBounds(22, 486, 104, 16);
 		mMonteCarloQueryForm.getContentPane().add(mOutputLabel);
 
-<<<<<<< HEAD
+
 	    
 		JPanel tableListPanel = new JPanel();
 		tableListPanel.setLayout( new BorderLayout() );
@@ -196,15 +191,6 @@ public class MainWindow {
 		//refer http://www.cs.cf.ac.uk/Dave/HCI/HCI_Handout_CALLER/node143.html
 
 	
-		
-=======
-		/*
-		 * mTableList = new JList(); String[] listTables = { "table1", "table2",
-		 * "table3" }; mTableList.setSelectedIndex(0);
-		 * mTableList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		 */
-
->>>>>>> e259fc4420d134cfa4db5e7d914925d45771b294
 		// initialize the QueryComparer (& H2 DB)
 		mQueryComparer = new QueryComparer();
 		ReturnValue rv = mQueryComparer.init();
@@ -275,11 +261,6 @@ public class MainWindow {
 			// get the schema and queries from their respective textboxes
 			String schema = mSchemaTextArea.getText();
 			mCurrentWorker = mQueryComparer.getCreateSchemaWorker(schema);
-<<<<<<< HEAD
-			
-=======
-
->>>>>>> e259fc4420d134cfa4db5e7d914925d45771b294
 			// create a worker to test these user inputs
 			// mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
 			// query2, true);
