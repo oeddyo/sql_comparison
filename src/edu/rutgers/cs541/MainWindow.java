@@ -21,15 +21,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Style;
@@ -322,9 +319,9 @@ public class MainWindow {
 			String query1 = mQuery1TextArea.getText();
 			String query2 = mQuery2TextArea.getText();
 
-			query1 = "SELECT t1.c1 FROM t1 WHERE t1.c2 > ALL (SELECT t2.c2 FROM t2)";
-			query2 = "SELECT t1.c1 FROM t1 WHERE t1.c2 > (SELECT MAX(t2.c2) FROM t2)";
-			schema = "CREATE TABLE t1 (c1 DOUBLE,  c2 DOUBLE, ); CREATE TABLE t2 (c1 DOUBLE, c2 DOUBLE,);";
+//			query1 = "SELECT t1.c1 FROM t1 WHERE t1.c2 > ALL (SELECT t2.c2 FROM t2)";
+//			query2 = "SELECT t1.c1 FROM t1 WHERE t1.c2 > (SELECT MAX(t2.c2) FROM t2)";
+//			schema = "CREATE TABLE t1 (c1 DOUBLE,  c2 DOUBLE, ); CREATE TABLE t2 (c1 DOUBLE, c2 DOUBLE,);";
 
 			// create a worker to test these user inputs
 			mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
