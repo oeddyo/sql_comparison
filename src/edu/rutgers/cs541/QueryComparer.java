@@ -143,21 +143,13 @@ public class QueryComparer {
 		protected ReturnValue doInBackground() throws Exception {
 			mStatement.execute("DROP ALL OBJECTS");
 			RunScript.execute(mConnection, new StringReader(mSchema));
-			System.out.println(mSchema);
-			DBOperation dbp = new DBOperation();
 			for (int t = 0; t < mTableNames.size(); t++) {
 				for (int i = 0; i < mSolution.get(t).size(); i++) {
-					StringBuilder tuple = new StringBuilder();
-					tuple.append(mSolution.get(t).get(i));
-					StringBuilder insertSb = dbp.generateInsertStatement(tuple,
-							mTableNames.get(t));
-					System.out.println(mTableNames.get(t));
-					System.out.println(tuple);
+					System.out.println(mSolution.get(t).get(i));
 					try {
-						mStatement.executeUpdate(insertSb.toString());
+						mStatement.executeUpdate(mSolution.get(t).get(i));
 					} catch (SQLException e) {
-						System.out
-								.println(e);
+						System.out.println(e);
 					}
 				}
 			}
