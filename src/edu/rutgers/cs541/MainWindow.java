@@ -50,7 +50,7 @@ public class MainWindow {
 
 	// a handle for any worker that is executing
 	private SwingWorker<ReturnValue, Object> mCurrentWorker;
-	
+
 	// this instance of a listener will be called when the
 	// worker finished execution
 	private QueryCompareListener mCompareListener = new QueryCompareListener();
@@ -158,6 +158,7 @@ public class MainWindow {
 
 		
 		mCreateSchema = new JButton("create schema");
+<<<<<<< HEAD
 		mCreateSchema.setBounds(550,453,97,25);
 		mCreateSchema.addActionListener(new CreateSchema());
 		mCreateSchema.setEnabled(true);
@@ -165,6 +166,10 @@ public class MainWindow {
 
 		
 		
+=======
+		mCreateSchema.setBounds(455, 455, 98, 28);
+
+>>>>>>> e259fc4420d134cfa4db5e7d914925d45771b294
 		mOutputTextArea = new JTextArea();
 		mOutputTextArea.setEditable(false);
 		mOutputTextArea.setBounds(22, 506, 500, 150);
@@ -177,6 +182,7 @@ public class MainWindow {
 		mOutputLabel.setBounds(22, 486, 104, 16);
 		mMonteCarloQueryForm.getContentPane().add(mOutputLabel);
 
+<<<<<<< HEAD
 	    
 		JPanel tableListPanel = new JPanel();
 		tableListPanel.setLayout( new BorderLayout() );
@@ -191,6 +197,14 @@ public class MainWindow {
 
 	
 		
+=======
+		/*
+		 * mTableList = new JList(); String[] listTables = { "table1", "table2",
+		 * "table3" }; mTableList.setSelectedIndex(0);
+		 * mTableList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		 */
+
+>>>>>>> e259fc4420d134cfa4db5e7d914925d45771b294
 		// initialize the QueryComparer (& H2 DB)
 		mQueryComparer = new QueryComparer();
 		ReturnValue rv = mQueryComparer.init();
@@ -261,10 +275,14 @@ public class MainWindow {
 			// get the schema and queries from their respective textboxes
 			String schema = mSchemaTextArea.getText();
 			mCurrentWorker = mQueryComparer.getCreateSchemaWorker(schema);
+<<<<<<< HEAD
 			
+=======
+
+>>>>>>> e259fc4420d134cfa4db5e7d914925d45771b294
 			// create a worker to test these user inputs
-			//mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
-			//		query2, true);
+			// mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
+			// query2, true);
 
 			// set the callback (PropertyChangeListener) for the worker
 			mCurrentWorker.addPropertyChangeListener(mCompareListener);
@@ -296,14 +314,8 @@ public class MainWindow {
 			// clear any old output
 			mOutputTextArea.setText("");
 
-			// get the schema and queries from their respective textboxes
-			String schema = mSchemaTextArea.getText();
-			String query1 = mQuery1TextArea.getText();
-			String query2 = mQuery2TextArea.getText();
-
 			// create a worker to test these user inputs
-			mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
-					query2, true);
+			mCurrentWorker = mQueryComparer.getMinimizeWorker();
 
 			// set the callback (PropertyChangeListener) for the worker
 			mCurrentWorker.addPropertyChangeListener(mCompareListener);
@@ -329,9 +341,13 @@ public class MainWindow {
 			String query1 = mQuery1TextArea.getText();
 			String query2 = mQuery2TextArea.getText();
 
+			query1 = "SELECT t1.c1 FROM t1 WHERE t1.c2 > ALL (SELECT t2.c2 FROM t2)";
+			query2 = "SELECT t1.c1 FROM t1 WHERE t1.c2 > (SELECT MAX(t2.c2) FROM t2)";
+			schema = "CREATE TABLE t1 (c1 DOUBLE,  c2 DOUBLE, ); CREATE TABLE t2 (c1 DOUBLE, c2 DOUBLE,);";
+
 			// create a worker to test these user inputs
 			mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
-					query2, false);
+					query2);
 
 			// set the callback (PropertyChangeListener) for the worker
 			mCurrentWorker.addPropertyChangeListener(mCompareListener);

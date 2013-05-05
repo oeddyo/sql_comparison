@@ -39,10 +39,11 @@ public class QueryComparer {
 	// handles to our H2 database
 	private Connection mConnection = null;
 	private Statement mStatement = null;
-	private Worker mWorker;
 	private Vector<String> mTableNames;
 	private Vector<Vector<String>> mSolution;
-	private boolean mIsMinimize;
+	private String mSchema;
+	private String mQuery1;
+	private String mQuery2;
 
 	/**
 	 * Loads the H2 Driver and initializes a database
@@ -124,23 +125,49 @@ public class QueryComparer {
 	}
 
 	public SwingWorker<ReturnValue, Object> getCompareWorker(String schema,
-			String query1, String query2, boolean isMinimize) {
-		mWorker = new Worker(schema, query1, query2);
-		mIsMinimize = isMinimize;
-		return mWorker;
+			String query1, String query2) {
+		return new Worker(schema, query1, query2);
+
 	}
 
-	public SwingWorker<ReturnValue, Object> minimizeSolution() {
-		return mWorker;
-
+	public SwingWorker<ReturnValue, Object> getMinimizeWorker() {
+		return new MinimizeWorker();
 	}
 
 	/**
 	 * This class that will be returned by getCompareWorker()
 	 */
-	private class SchemaWorker extends SwingWorker<ReturnValue, Object> {
-		private String mSchema;
+	private class MinimizeWorker extends SwingWorker<ReturnValue, Object> {
 
+		@Override
+		protected ReturnValue doInBackground() throws Exception {
+			mStatement.execute("DROP ALL OBJECTS");
+			RunScript.execute(mConnection, new StringReader(mSchema));
+			System.out.println(mSchema);
+			DBOperation dbp = new DBOperation();
+			for (int t = 0; t < mTableNames.size(); t++) {
+				for (int i = 0; i < mSolution.get(t).size(); i++) {
+					StringBuilder tuple = new StringBuilder();
+					tuple.append(mSolution.get(t).get(i));
+					StringBuilder insertSb = dbp.generateInsertStatement(tuple,
+							mTableNames.get(t));
+					System.out.println(mTableNames.get(t));
+					System.out.println(tuple);
+					try {
+						mStatement.executeUpdate(insertSb.toString());
+					} catch (SQLException e) {
+						System.out
+								.println("Error: cannot insert tuples into db.");
+					}
+				}
+			}
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
+			return new ReturnValue(Code.SUCCESS, outputStream.toString());
+		}
+	}
+
+	private class SchemaWorker extends SwingWorker<ReturnValue, Object> {
 		public SchemaWorker(String schema) {
 			mSchema = schema;
 		}
@@ -149,6 +176,14 @@ public class QueryComparer {
 		protected ReturnValue doInBackground() throws Exception {
 			mStatement.execute("DROP ALL OBJECTS");
 			RunScript.execute(mConnection, new StringReader(mSchema));
+			ResultSet rsTab = mStatement.executeQuery("SELECT table_name "
+					+ "FROM information_schema.tables "
+					+ "WHERE table_schema = 'PUBLIC'");
+			mTableNames = new Vector<String>();
+			while (rsTab.next()) {
+				// note that column indexing starts from 1
+				mTableNames.add(rsTab.getString(1));
+			}
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
 			return new ReturnValue(Code.SUCCESS, outputStream.toString());
@@ -156,9 +191,6 @@ public class QueryComparer {
 	}
 
 	private class Worker extends SwingWorker<ReturnValue, Object> {
-		private String mSchema;
-		private String mQuery1;
-		private String mQuery2;
 
 		/**
 		 * Constructor for our Worker
@@ -267,10 +299,6 @@ public class QueryComparer {
 					}
 				}
 				mSolution = solution;
-				if (mIsMinimize) {
-					mSolution = dbp.minimizeSolution(mSolution, mTableNames,
-							mStatement, mQuery1, mQuery2);
-				}
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
 				return new ReturnValue(Code.SUCCESS, outputStream.toString());
