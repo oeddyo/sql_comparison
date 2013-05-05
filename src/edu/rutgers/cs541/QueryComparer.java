@@ -39,6 +39,10 @@ public class QueryComparer {
 	// handles to our H2 database
 	private Connection mConnection = null;
 	private Statement mStatement = null;
+	private Worker mWorker;
+	private Vector<String> mTableNames;
+	// private Vector<Vector<String>> mFirstSolution;
+	private boolean mIsMinimize;
 
 	/**
 	 * Loads the H2 Driver and initializes a database
@@ -101,8 +105,15 @@ public class QueryComparer {
 	 * @return a SwingWorker which can be executed by a worker thread
 	 */
 	public SwingWorker<ReturnValue, Object> getCompareWorker(String schema,
-			String query1, String query2) {
-		return new Worker(schema, query1, query2);
+			String query1, String query2, boolean isMinimize) {
+		mWorker = new Worker(schema, query1, query2);
+		mIsMinimize = isMinimize;
+		return mWorker;
+	}
+
+	public SwingWorker<ReturnValue, Object> minimizeSolution() {
+		return mWorker;
+
 	}
 
 	/**
@@ -135,6 +146,7 @@ public class QueryComparer {
 		 * 
 		 * @see javax.swing.SwingWorker#doInBackground()
 		 */
+
 		@Override
 		protected ReturnValue doInBackground() throws Exception {
 
@@ -153,10 +165,10 @@ public class QueryComparer {
 			ResultSet rsTab = mStatement.executeQuery("SELECT table_name "
 					+ "FROM information_schema.tables "
 					+ "WHERE table_schema = 'PUBLIC'");
-			Vector<String> tableNames = new Vector<String>();
+			mTableNames = new Vector<String>();
 			while (rsTab.next()) {
 				// note that column indexing starts from 1
-				tableNames.add(rsTab.getString(1));
+				mTableNames.add(rsTab.getString(1));
 			}
 			rsTab.close();
 
@@ -164,7 +176,7 @@ public class QueryComparer {
 
 			Vector<Vector<Integer>> dataTypeVV = new Vector<Vector<Integer>>();
 			Vector<Vector<Boolean>> isNullableVV = new Vector<Vector<Boolean>>();
-			for (String tableName : tableNames) {
+			for (String tableName : mTableNames) {
 				DBStructure dps = new DBStructure(tableName, mStatement);
 				Vector<Integer> dataTypes = dps.getDataTypes();
 				Vector<Boolean> isNullables = dps.getIsNullables();
@@ -183,12 +195,12 @@ public class QueryComparer {
 				while (!QueryComparison
 						.bagCompare(mStatement, mQuery1, mQuery2)) {
 					// try to insert tuple
-					dbp.clearAllTables(tableNames, mStatement);
+					dbp.clearAllTables(mTableNames, mStatement);
 					solution.clear();
 					strt.changeIndex();
-					for (int t = 0; t < tableNames.size(); t++) {
+					for (int t = 0; t < mTableNames.size(); t++) {
 						// read and parse the table
-						String tableName = tableNames.elementAt(t);
+						String tableName = mTableNames.elementAt(t);
 						DBStructure dps = new DBStructure(tableName, mStatement);
 						Vector<Integer> dataTypes = dps.getDataTypes();
 						Vector<Boolean> isNullables = dps.getIsNullables();
@@ -217,6 +229,11 @@ public class QueryComparer {
 						}
 						solution.add(insertedTuples);
 					}
+				}
+				// mFirstSolution = solution;
+				if (mIsMinimize) {
+					solution = dbp.minimizeSolution(solution, mTableNames,
+							mStatement, mQuery1, mQuery2);
 				}
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
