@@ -1,5 +1,6 @@
 package edu.rutgers.cs541;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,22 +8,28 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Style;
@@ -64,9 +71,12 @@ public class MainWindow {
 	private JButton mCancelButton;
 	private JButton mStartMinimalButton;
 	private JButton mCreateSchema;
-
+	private Vector<String> tablesList;
+	
 	private JList mTableList;
-
+	
+	private JPanel tableListPanel;
+	
 	/**
 	 * Create the application.
 	 */
@@ -82,7 +92,7 @@ public class MainWindow {
 	 */
 	private void initialize() {
 		mMonteCarloQueryForm = new JFrame();
-		mMonteCarloQueryForm.setResizable(false);
+		mMonteCarloQueryForm.setResizable(true);
 		mMonteCarloQueryForm.setTitle("Monte Carlo Query Comparer");
 		mMonteCarloQueryForm.setBounds(100, 100, 777, 714);
 		mMonteCarloQueryForm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -146,15 +156,20 @@ public class MainWindow {
 		mCancelButton.setEnabled(false);
 		mMonteCarloQueryForm.getContentPane().add(mCancelButton);
 
+		
 		mCreateSchema = new JButton("create schema");
-		mCreateSchema.setBounds(455,455,98,28);
+		mCreateSchema.setBounds(550,453,97,25);
+		mCreateSchema.addActionListener(new CreateSchema());
+		mCreateSchema.setEnabled(true);
+		mMonteCarloQueryForm.getContentPane().add(mCreateSchema);
+
 		
 		
 		mOutputTextArea = new JTextArea();
 		mOutputTextArea.setEditable(false);
-		mOutputTextArea.setBounds(22, 506, 720, 150);
+		mOutputTextArea.setBounds(22, 506, 500, 150);
 		JScrollPane outputTextAreaScrollPane = new JScrollPane(mOutputTextArea);
-		outputTextAreaScrollPane.setBounds(22, 506, 720, 150);
+		outputTextAreaScrollPane.setBounds(22, 506, 500, 150);
 		mMonteCarloQueryForm.getContentPane().add(outputTextAreaScrollPane);
 
 		mOutputLabel = new JLabel("Output");
@@ -162,15 +177,19 @@ public class MainWindow {
 		mOutputLabel.setBounds(22, 486, 104, 16);
 		mMonteCarloQueryForm.getContentPane().add(mOutputLabel);
 
+	    
+		JPanel tableListPanel = new JPanel();
+		tableListPanel.setLayout( new BorderLayout() );
+		// Create a new listbox control
+		String	listData[] = 		{"aa","bb", "cccsfddsf"
+		};
+		Vector<String> tmpDataVector = new Vector<String> ();
+		tmpDataVector.addAll(Arrays.asList(listData));
+		setPopulatedJList(tmpDataVector);
 		
-		/*
-		mTableList = new JList();
-		String[] listTables = { "table1", "table2", "table3" };
-		mTableList.setSelectedIndex(0);
-		mTableList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		*/
+		//refer http://www.cs.cf.ac.uk/Dave/HCI/HCI_Handout_CALLER/node143.html
 
-		
+	
 		
 		// initialize the QueryComparer (& H2 DB)
 		mQueryComparer = new QueryComparer();
@@ -182,13 +201,29 @@ public class MainWindow {
 			putReturnValueContentsInOutputWindow(rv);
 		}
 	}
+	
+	private void setPopulatedJList(Vector<String> listData){
+		//mMonteCarloQueryForm.getContentPane().remove(mTableList);
+		System.out.println(listData.get(0));
+		 mTableList = new JList(listData);
+		//JList listbox = new JList( listData );
+		JPanel tableListPanel = new JPanel();
+		tableListPanel.add( mTableList, BorderLayout.CENTER );
+		JScrollPane tableListlScrollPane = new JScrollPane(tableListPanel);
+		tableListlScrollPane.setBounds(560,522,200,80);
+		//mTableList.setBounds(560,522,200,80);
+		tableListlScrollPane.setBounds(560,522,200,80);
+		
+		 mMonteCarloQueryForm.getContentPane().add(tableListlScrollPane);
+	}
 
 	/**
 	 * This ActionListener will be called when the user clicks the start button
 	 * 
 	 */
-
-	private class CreateSchema implements ActionListener {
+	
+	/*
+	private class ListSelectionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// prevent the user from clicking start again
 			mStartMinimalButton.setEnabled(false);
@@ -197,7 +232,7 @@ public class MainWindow {
 
 			// get the schema and queries from their respective textboxes
 			String schema = mSchemaTextArea.getText();
-			mCurrentWorker = mQueryComparer.createSchema( schema);
+			mCurrentWorker = mQueryComparer.getCreateSchemaWorker(schema);
 			
 			// create a worker to test these user inputs
 			//mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
@@ -211,6 +246,46 @@ public class MainWindow {
 
 			// allow the user to click the cancel button
 			mCancelButton.setEnabled(true);
+		}
+	}
+	*/
+
+	private class CreateSchema implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			// prevent the user from clicking start again
+			System.out.println("in function");
+			mStartMinimalButton.setEnabled(false);
+			// clear any old output
+			mOutputTextArea.setText("");
+
+			// get the schema and queries from their respective textboxes
+			String schema = mSchemaTextArea.getText();
+			mCurrentWorker = mQueryComparer.getCreateSchemaWorker(schema);
+			
+			// create a worker to test these user inputs
+			//mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
+			//		query2, true);
+
+			// set the callback (PropertyChangeListener) for the worker
+			mCurrentWorker.addPropertyChangeListener(mCompareListener);
+
+			// start the worker (executes on a worker thread)
+			mCurrentWorker.execute();
+
+			// allow the user to click the cancel button
+			mCancelButton.setEnabled(true);
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			tablesList = mQueryComparer.getAllTableNames();
+			System.out.println(tablesList.get(0));
+
+			setPopulatedJList(tablesList);
+			
 		}
 	}
 
@@ -397,10 +472,6 @@ public class MainWindow {
 			keywords.add("null");
 			keywords.add("column");
 			keywords.add("distinct");
-<<<<<<< HEAD
-=======
-
->>>>>>> 2f112920cafe31e930da09a62c873a8525a9d6ae
 		}
 
 		public void colouring(StyledDocument doc, int pos, int len)
@@ -426,7 +497,7 @@ public class MainWindow {
 			int wordEnd = indexOfWordEnd(doc, pos);
 			String word = doc.getText(pos, wordEnd - pos);
 
-			if (keywords.contains(word)) {
+			if (keywords.contains(word.toLowerCase())) {
 				SwingUtilities.invokeLater(new ColouringTask(doc, pos, wordEnd
 						- pos, keywordStyle));
 			} else {
