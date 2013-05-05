@@ -222,8 +222,7 @@ public class MainWindow {
 			String query2 = mQuery2TextArea.getText();
 
 			// create a worker to test these user inputs
-			mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
-					query2);
+			mCurrentWorker = mQueryComparer.getMinimizeWorker();
 
 			// set the callback (PropertyChangeListener) for the worker
 			mCurrentWorker.addPropertyChangeListener(mCompareListener);
@@ -250,7 +249,9 @@ public class MainWindow {
 			String query2 = mQuery2TextArea.getText();
 
 			// create a worker to test these user inputs
-			mCurrentWorker = mQueryComparer.getMinimizeWorker();
+			mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
+					query2);
+
 			// set the callback (PropertyChangeListener) for the worker
 			mCurrentWorker.addPropertyChangeListener(mCompareListener);
 

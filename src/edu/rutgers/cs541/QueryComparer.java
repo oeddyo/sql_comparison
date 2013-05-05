@@ -39,7 +39,6 @@ public class QueryComparer {
 	// handles to our H2 database
 	private Connection mConnection = null;
 	private Statement mStatement = null;
-	private Worker mWorker;
 	private Vector<String> mTableNames;
 	private Vector<Vector<String>> mSolution;
 	private String mSchema;
@@ -167,7 +166,6 @@ public class QueryComparer {
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
 			return new ReturnValue(Code.SUCCESS, outputStream.toString());
-
 		}
 	}
 
