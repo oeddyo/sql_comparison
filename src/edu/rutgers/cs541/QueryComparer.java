@@ -153,6 +153,9 @@ public class QueryComparer {
 					}
 				}
 			}
+			DBOperation dbp = new DBOperation();
+			mSolution = dbp.minimizeSolution(mSolution, mTableNames,
+					mStatement, mQuery1, mQuery2);
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
 			return new ReturnValue(Code.SUCCESS, outputStream.toString());

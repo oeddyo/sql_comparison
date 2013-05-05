@@ -274,7 +274,7 @@ public class MainWindow {
 			// allow the user to click the cancel button
 			mCancelButton.setEnabled(true);
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(0);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
