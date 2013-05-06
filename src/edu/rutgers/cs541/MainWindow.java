@@ -212,29 +212,6 @@ public class MainWindow {
 	 * 
 	 */
 
-	/*
-	 * private class ListSelectionListener implements ActionListener { public
-	 * void actionPerformed(ActionEvent e) { // prevent the user from clicking
-	 * start again mStartMinimalButton.setEnabled(false); // clear any old
-	 * output mOutputTextArea.setText("");
-	 * 
-	 * // get the schema and queries from their respective textboxes String
-	 * schema = mSchemaTextArea.getText(); mCurrentWorker =
-	 * mQueryComparer.getCreateSchemaWorker(schema);
-	 * 
-	 * // create a worker to test these user inputs //mCurrentWorker =
-	 * mQueryComparer.getCompareWorker(schema, query1, // query2, true);
-	 * 
-	 * // set the callback (PropertyChangeListener) for the worker
-	 * mCurrentWorker.addPropertyChangeListener(mCompareListener);
-	 * 
-	 * // start the worker (executes on a worker thread)
-	 * mCurrentWorker.execute();
-	 * 
-	 * // allow the user to click the cancel button
-	 * mCancelButton.setEnabled(true); } }
-	 */
-
 	private class CreateSchema implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// prevent the user from clicking start again
@@ -306,16 +283,13 @@ public class MainWindow {
 			String schema = mSchemaTextArea.getText();
 			String query1 = mQuery1TextArea.getText();
 			String query2 = mQuery2TextArea.getText();
+
 			schema = ReadFile.readFileOrDie("sample_input/schema5.sql");
 			query1 = ReadFile.readFileOrDie("sample_input/query5a.sql");
 			query2 = ReadFile.readFileOrDie("sample_input/query5b.sql");
 
-			// query1 =
-			// "SELECT t1.c1 FROM t1 WHERE t1.c2 > ALL (SELECT t2.c2 FROM t2)";
-			// query2 =
-			// "SELECT t1.c1 FROM t1 WHERE t1.c2 > (SELECT MAX(t2.c2) FROM t2)";
-			// schema =
-			// "CREATE TABLE t1 (c1 DOUBLE,  c2 DOUBLE, ); CREATE TABLE t2 (c1 DOUBLE, c2 DOUBLE,);";
+			// if (schema.equals("") || query1.equals("") || query2.equals(""))
+			// return;
 
 			// create a worker to test these user inputs
 			mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,

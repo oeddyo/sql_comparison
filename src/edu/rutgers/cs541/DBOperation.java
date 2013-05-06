@@ -109,7 +109,7 @@ public class DBOperation {
 		// we assume in the H2 db, we have the separating tuples
 		Vector<Vector<String>> res = new Vector<Vector<String>>();
 
-		for (int it = 0; it < 1; it++) {
+		for (int it = 0; it < 16; it++) {
 			for (int i = 0; i < solution.size(); i++) {
 				String table = tables.elementAt(i);
 				res.add(minimizeSingleTable(solution.elementAt(i), table, stmt,

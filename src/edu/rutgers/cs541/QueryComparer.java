@@ -209,97 +209,74 @@ public class QueryComparer {
 		 * 
 		 * @see javax.swing.SwingWorker#doInBackground()
 		 */
-
-		@Override
 		protected ReturnValue doInBackground() throws Exception {
 
 			// clear out anything still left in the DB
 			// (note that we do this in a lazy manner)
-			mStatement.execute("DROP ALL OBJECTS");
 
-			// Unlike phase 1, the script is not given to us in a file,
-			// so we would have to write it to file in order to
-			// execute RUNSCRIPT
-			// we can avoid the file using this function from the H2 api
-			RunScript.execute(mConnection, new StringReader(mSchema));
-
-			// see what tables are in the schema
-			// (note that the user schema is called PUBLIC by default)
-			ResultSet rsTab = mStatement.executeQuery("SELECT table_name "
-					+ "FROM information_schema.tables "
-					+ "WHERE table_schema = 'PUBLIC'");
-			mTableNames = new Vector<String>();
-			while (rsTab.next()) {
-				// note that column indexing starts from 1
-				mTableNames.add(rsTab.getString(1));
+			Vector<GenerateAndTest> threads = new Vector<GenerateAndTest>();
+			for (int i = 0; i < 16; i++) {
+				String db_url = DB_URL + ((Integer) i).toString();
+				GenerateAndTest my_thread = new GenerateAndTest(db_url,
+						mSchema, mQuery1, mQuery2);
+				threads.add(my_thread);
+				my_thread.start();
 			}
-			rsTab.close();
 
-			DBOperation dbp = new DBOperation();
-
-			Vector<Vector<Integer>> dataTypeVV = new Vector<Vector<Integer>>();
-			Vector<Vector<Boolean>> isNullableVV = new Vector<Vector<Boolean>>();
-			for (String tableName : mTableNames) {
-				DBStructure dps = new DBStructure(tableName, mStatement);
-				Vector<Integer> dataTypes = dps.getDataTypes();
-				Vector<Boolean> isNullables = dps.getIsNullables();
-				dataTypeVV.add(dataTypes);
-				isNullableVV.add(isNullables);
-			}
-			Vector<Vector<String>> solution = new Vector<Vector<String>>();
-			// tmp vector to store the tuples
-			Strategy strt = new Strategy();
-
-			// in this loop, we continually insert tuples into the tables until
-			// either the user cancels,
-			// or we find differences in the result sets of our two queries
 			while (!isCancelled()) {
-
-				while (!QueryComparison
-						.bagCompare(mStatement, mQuery1, mQuery2)) {
-					// try to insert tuple
-					dbp.clearAllTables(mTableNames, mStatement);
-					solution.clear();
-					strt.changeIndex();
-					for (int t = 0; t < mTableNames.size(); t++) {
-						// read and parse the table
-						String tableName = mTableNames.elementAt(t);
-						DBStructure dps = new DBStructure(tableName, mStatement);
-						Vector<Integer> dataTypes = dps.getDataTypes();
-						Vector<Boolean> isNullables = dps.getIsNullables();
-						Vector<String> insertedTuples = new Vector<String>();
-
-						// insert 100 tuples for each table
-						int dt = 0;
-						while (true) {
-							if (insertedTuples.size() == 10)
-								break;
-							dt++;
-							if (dt == 50)
-								break;
-							StringBuilder tuple = dbp.generateTuple(dataTypes,
-									isNullables, strt);
-							StringBuilder insertSb = dbp
-									.generateInsertStatement(tuple, tableName);
-
-							try {
-								mStatement.executeUpdate(insertSb.toString());
-								insertedTuples.add(insertSb.toString());
-							} catch (SQLException e) {
-								System.out
-										.println("Error: cannot insert tuples into db.");
-							}
+				int finished_thread = -1;
+				while (true) {
+					for (int i = 0; i < threads.size(); i++) {
+						if (threads.get(i).isFound()) {
+							finished_thread = i;
+							System.out.println("Thread "
+									+ ((Integer) (finished_thread)).toString()
+									+ " successfully gets the solution.");
+							break;
 						}
-						solution.add(insertedTuples);
+					}
+					if (finished_thread != -1)
+						break;
+				}
+				for (int i = 0; i < threads.size(); i++) {
+					threads.get(i).Stop();
+					System.out.println("Thread " + ((Integer) (i)).toString()
+							+ " is killed.");
+				}
+				mSolution = threads.get(finished_thread).getSolution();
+
+				mStatement.execute("DROP ALL OBJECTS");
+
+				RunScript.execute(mConnection, new StringReader(mSchema));
+
+				ResultSet rsTab = mStatement.executeQuery("SELECT table_name "
+						+ "FROM information_schema.tables "
+						+ "WHERE table_schema = 'PUBLIC'");
+				mTableNames = new Vector<String>();
+				while (rsTab.next()) {
+					// note that column indexing starts from 1
+					mTableNames.add(rsTab.getString(1));
+				}
+				rsTab.close();
+
+				for (Vector<String> sol : mSolution) {
+					for (String insertSb : sol) {
+						try {
+							mStatement.executeUpdate(insertSb.toString());
+						} catch (SQLException e) {
+							System.out
+									.println("We cannot never get here, if not bug.");
+						}
 					}
 				}
-				mSolution = solution;
+
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
 				return new ReturnValue(Code.SUCCESS, outputStream.toString());
 			}
-
-			// we are outside the loop, so the user must have canceled
+			for (int i = 0; i < threads.size(); i++) {
+				threads.get(i).Stop();
+			}
 			return new ReturnValue(Code.FAILURE, "No Results - Canceled");
 		}
 	}

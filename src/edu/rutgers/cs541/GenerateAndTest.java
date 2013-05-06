@@ -11,21 +11,26 @@ import java.util.Vector;
 import org.h2.tools.RunScript;
 
 public class GenerateAndTest extends Thread {
-	private String mDB_URL = "jdbc:h2:mem:db";
+	private String mDB_URL = null;
 	private String mDB_USER = "dummy";
 	private String mDB_PASSWORD = "password";
 	private Connection mConnection = null;
 	private Statement mStatement = null;
-	private Vector<String> mTableNames;
-	private Vector<Vector<String>> mSolution;
-	private String mSchema;
-	private String mQuery1;
-	private String mQuery2;
+	private Vector<String> mTableNames = null;
+	private Vector<Vector<String>> mSolution = null;
+	private String mSchema = null;
+	private String mQuery1 = null;
+	private String mQuery2 = null;
+	private boolean mStopped = false;
 	private boolean mFound;
 
-	GenerateAndTest(String DB_URL) {
+	GenerateAndTest(String DB_URL, String schema, String query1, String query2) {
 		mDB_URL = DB_URL;
+		mQuery1 = query1;
+		mQuery2 = query2;
+		mSchema = schema;
 		mFound = false;
+		mStopped = false;
 
 		// load the H2 Driver
 		try {
@@ -46,6 +51,11 @@ public class GenerateAndTest extends Thread {
 			mStatement = mConnection.createStatement();
 		} catch (SQLException e) {
 		}
+		System.out.println("created thread " + mDB_URL);
+	}
+
+	public void Stop() {
+		mStopped = true;
 	}
 
 	// This is the entry point for the second thread.
@@ -88,13 +98,8 @@ public class GenerateAndTest extends Thread {
 		// tmp vector to store the tuples
 		Strategy strt = new Strategy();
 
-		// in this loop, we continually insert tuples into the tables until
-		// either the user cancels,
-		// or we find differences in the result sets of our two queries
-
-		while (!QueryComparison.bagCompare(mStatement, mQuery1, mQuery2)) {
-			// try to insert tuple
-			dbp.clearAllTables(mTableNames, mStatement);
+		while (!mStopped
+				&& !QueryComparison.bagCompare(mStatement, mQuery1, mQuery2)) {
 			solution.clear();
 			strt.changeIndex();
 			for (int t = 0; t < mTableNames.size(); t++) {
@@ -122,8 +127,8 @@ public class GenerateAndTest extends Thread {
 						mStatement.executeUpdate(insertSb.toString());
 						insertedTuples.add(insertSb.toString());
 					} catch (SQLException e) {
-						System.out
-								.println("Error: cannot insert tuples into db.");
+						// System.out
+						// .println("Error: cannot insert tuples into db.");
 					}
 				}
 				solution.add(insertedTuples);
@@ -131,6 +136,12 @@ public class GenerateAndTest extends Thread {
 		}
 		mFound = true;
 		mSolution = solution;
+		try {
+			mStatement.execute("DROP ALL OBJECTS");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public boolean isFound() {
