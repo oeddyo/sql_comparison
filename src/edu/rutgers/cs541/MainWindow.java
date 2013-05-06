@@ -286,9 +286,9 @@ public class MainWindow {
 			String query1 = mQuery1TextArea.getText();
 			String query2 = mQuery2TextArea.getText();
 
-//			schema = ReadFile.readFileOrDie("sample_input/schema5.sql");
-//			query1 = ReadFile.readFileOrDie("sample_input/query5a.sql");
-//			query2 = ReadFile.readFileOrDie("sample_input/query5b.sql");
+			schema = ReadFile.readFileOrDie("sample_input/schema6.sql");
+			query1 = ReadFile.readFileOrDie("sample_input/query6a.sql");
+			query2 = ReadFile.readFileOrDie("sample_input/query6b.sql");
 
 			// if (schema.equals("") || query1.equals("") || query2.equals(""))
 			// return;

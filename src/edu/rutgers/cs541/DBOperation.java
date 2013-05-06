@@ -107,15 +107,34 @@ public class DBOperation {
 			Vector<Vector<String>> solution, Vector<String> tables,
 			Statement stmt, String query1, String query2) {
 		// we assume in the H2 db, we have the separating tuples
-		Vector<Vector<String>> res = new Vector<Vector<String>>();
-
-		for (int it = 0; it < 16; it++) {
-			for (int i = 0; i < solution.size(); i++) {
+		Vector<Vector<String>> pre_solution = new Vector<Vector<String>>(
+				solution);
+		Vector<Vector<String>> res = null;
+		boolean updated = true;
+		int interation = 0;
+		while (updated) {
+			Debug.out("Number of stochastic minimization: " + ++interation);
+			updated = false;
+			res = new Vector<Vector<String>>();
+			for (int i = 0; i < pre_solution.size(); i++) {
 				String table = tables.elementAt(i);
-				res.add(minimizeSingleTable(solution.elementAt(i), table, stmt,
-						query1, query2));
+				res.add(minimizeSingleTable(pre_solution.elementAt(i), table,
+						stmt, query1, query2));
+				if (res.lastElement().size() < pre_solution.get(i).size()) {
+					// it reduced
+					updated = true;
+				}
 			}
+			pre_solution = new Vector<Vector<String>>(res);
 		}
+		// Vector<Vector<String>> res = new Vector<Vector<String>>();
+		// for (int it = 0; it < 16; it++) {
+		// for (int i = 0; i < solution.size(); i++) {
+		// String table = tables.elementAt(i);
+		// res.add(minimizeSingleTable(solution.elementAt(i), table, stmt,
+		// query1, query2));
+		// }
+		// }
 		return res;
 	}
 
