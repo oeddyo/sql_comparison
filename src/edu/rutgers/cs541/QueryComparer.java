@@ -68,6 +68,7 @@ public class QueryComparer {
 					int right = tuple.indexOf(')');
 					res.add(tuple.substring(left + 1, right));
 				}
+				break;
 			}
 
 		}
