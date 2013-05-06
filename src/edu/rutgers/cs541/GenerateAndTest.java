@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.Vector;
 
 import org.h2.tools.RunScript;
@@ -80,6 +81,7 @@ public class GenerateAndTest extends Thread {
 				// note that column indexing starts from 1
 				mTableNames.add(rsTab.getString(1));
 			}
+			Collections.sort(mTableNames);
 			rsTab.close();
 		} catch (SQLException e) {
 		}

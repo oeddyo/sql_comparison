@@ -305,6 +305,19 @@ public class MainWindow {
 
 			// allow the user to click the cancel button
 			mCancelButton.setEnabled(true);
+
+			while (!mCurrentWorker.isDone()) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			Vector<String> allTables = mQueryComparer.getAllTableNames();
+			for (String t : mQueryComparer.getAllTuplesFromTable(allTables
+					.lastElement()))
+				System.out.println(t);
 		}
 	}
 

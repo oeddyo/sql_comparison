@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -59,13 +60,18 @@ public class QueryComparer {
 	}
 
 	public Vector<String> getAllTuplesFromTable(String table) {
+		Vector<String> res = new Vector<String>();
 		for (int i = 0; i < mTableNames.size(); i++) {
 			if (table.equals(mTableNames.get(i))) {
-				return mSolution.get(i);
+				for (String tuple : mSolution.get(i)) {
+					int left = tuple.indexOf('(');
+					int right = tuple.indexOf(')');
+					res.add(tuple.substring(left + 1, right));
+				}
 			}
 
 		}
-		return mSolution.lastElement();
+		return res;
 	}
 
 	public ReturnValue init() {
@@ -176,6 +182,7 @@ public class QueryComparer {
 					// note that column indexing starts from 1
 					mTableNames.add(rsTab.getString(1));
 				}
+				Collections.sort(mTableNames);
 			} catch (Exception e) {
 			}
 		}
@@ -270,6 +277,7 @@ public class QueryComparer {
 					// note that column indexing starts from 1
 					mTableNames.add(rsTab.getString(1));
 				}
+				Collections.sort(mTableNames);
 				rsTab.close();
 
 				for (Vector<String> sol : mSolution) {
