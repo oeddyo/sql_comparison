@@ -165,20 +165,33 @@ public class QueryComparer {
 	private class SchemaWorker extends SwingWorker<ReturnValue, Object> {
 		public SchemaWorker(String schema) {
 			mSchema = schema;
+			try {
+				mStatement.execute("DROP ALL OBJECTS");
+				RunScript.execute(mConnection, new StringReader(mSchema));
+				ResultSet rsTab = mStatement.executeQuery("SELECT table_name "
+						+ "FROM information_schema.tables "
+						+ "WHERE table_schema = 'PUBLIC'");
+				mTableNames = new Vector<String>();
+				while (rsTab.next()) {
+					// note that column indexing starts from 1
+					mTableNames.add(rsTab.getString(1));
+				}
+			} catch (Exception e) {
+			}
 		}
 
 		@Override
 		protected ReturnValue doInBackground() throws Exception {
-			mStatement.execute("DROP ALL OBJECTS");
-			RunScript.execute(mConnection, new StringReader(mSchema));
-			ResultSet rsTab = mStatement.executeQuery("SELECT table_name "
-					+ "FROM information_schema.tables "
-					+ "WHERE table_schema = 'PUBLIC'");
-			mTableNames = new Vector<String>();
-			while (rsTab.next()) {
-				// note that column indexing starts from 1
-				mTableNames.add(rsTab.getString(1));
-			}
+			// mStatement.execute("DROP ALL OBJECTS");
+			// RunScript.execute(mConnection, new StringReader(mSchema));
+			// ResultSet rsTab = mStatement.executeQuery("SELECT table_name "
+			// + "FROM information_schema.tables "
+			// + "WHERE table_schema = 'PUBLIC'");
+			// mTableNames = new Vector<String>();
+			// while (rsTab.next()) {
+			// // note that column indexing starts from 1
+			// mTableNames.add(rsTab.getString(1));
+			// }
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			Script.execute(DB_URL, DB_USER, DB_PASSWORD, outputStream);
 			return new ReturnValue(Code.SUCCESS, outputStream.toString());
@@ -215,7 +228,7 @@ public class QueryComparer {
 			// (note that we do this in a lazy manner)
 
 			Vector<GenerateAndTest> threads = new Vector<GenerateAndTest>();
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < 1; i++) {
 				String db_url = DB_URL + ((Integer) i).toString();
 				GenerateAndTest my_thread = new GenerateAndTest(db_url,
 						mSchema, mQuery1, mQuery2);

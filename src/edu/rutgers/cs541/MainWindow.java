@@ -243,6 +243,8 @@ public class MainWindow {
 			}
 
 			tablesList = mQueryComparer.getAllTableNames();
+			for (String tn : tablesList)
+				System.out.println("table: " + tn);
 			System.out.println(tablesList.get(0));
 
 			setPopulatedJList(tablesList);
