@@ -523,6 +523,7 @@ public class MainWindow {
 			String schema = mSchemaTextArea.getText();
 			String query1 = mQuery1TextArea.getText();
 			String query2 = mQuery2TextArea.getText();
+<<<<<<< HEAD
 			
 			if(query1.length()<6 || query2.length()<6){
 				mOutputTextArea.append(warningMsg+getCurrentTime()+" NO VALID SQL FOUND\n");
@@ -538,6 +539,13 @@ public class MainWindow {
 			query1 = ReadFile.readFileOrDie("sample_input/query5a.sql");
 			query2 = ReadFile.readFileOrDie("sample_input/query5b.sql");
 			*/
+=======
+
+			schema = ReadFile.readFileOrDie("sample_input/schema6.sql");
+			query1 = ReadFile.readFileOrDie("sample_input/query6a.sql");
+			query2 = ReadFile.readFileOrDie("sample_input/query6b.sql");
+
+>>>>>>> a053cda99339c68fac7ba78e7fd1f1c109279dfa
 			// if (schema.equals("") || query1.equals("") || query2.equals(""))
 			// return;
 

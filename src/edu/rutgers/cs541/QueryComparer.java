@@ -253,7 +253,7 @@ public class QueryComparer {
 			// (note that we do this in a lazy manner)
 
 			Vector<GenerateAndTest> threads = new Vector<GenerateAndTest>();
-			for (int i = 0; i < 1; i++) {
+			for (int i = 0; i < 2; i++) {
 				String db_url = DB_URL + ((Integer) i).toString();
 				GenerateAndTest my_thread = new GenerateAndTest(db_url,
 						mSchema, mQuery1, mQuery2);

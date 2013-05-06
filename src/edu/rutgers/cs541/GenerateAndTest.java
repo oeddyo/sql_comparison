@@ -111,36 +111,42 @@ public class GenerateAndTest extends Thread {
 			// Collections.shuffle(mTableNames);
 			// end
 
-			for (int t = 0; t < mTableNames.size(); t++) {
-				// read and parse the table
-				String tableName = mTableNames.elementAt(t);
-				DBStructure dps = new DBStructure(tableName, mStatement);
-				Vector<Integer> dataTypes = dps.getDataTypes();
-				Vector<Boolean> isNullables = dps.getIsNullables();
-				Vector<String> insertedTuples = new Vector<String>();
+			for (int i = 0; i < mTableNames.size(); i++) {
+				solution.add(new Vector<String>());
+			}
 
-				// insert 100 tuples for each table
-				int dt = 0;
-				while (true) {
-					if (insertedTuples.size() == 10)
-						break;
-					dt++;
-					if (dt == 50)
-						break;
-					StringBuilder tuple = dbp.generateTuple(dataTypes,
-							isNullables, strt);
-					StringBuilder insertSb = dbp.generateInsertStatement(tuple,
-							tableName);
+			for (int T = 0; T < 10; T++) {
+				// The loop for T is for "Foreign Key Constraints" .Yes it is.
+				for (int t = 0; t < mTableNames.size(); t++) {
+					// read and parse the table
+					String tableName = mTableNames.elementAt(t);
+					Vector<Integer> dataTypes = dataTypeVV.get(t);
+					Vector<Boolean> isNullables = isNullableVV.get(t);
 
-					try {
-						mStatement.executeUpdate(insertSb.toString());
-						insertedTuples.add(insertSb.toString());
-					} catch (SQLException e) {
-						// System.out
-						// .println("Error: cannot insert tuples into db.");
+					// insert 100 tuples for each table
+					int dt = 0;
+					while (true) {
+						if (solution.get(t).size() == 10)
+							break;
+						dt++;
+						if (dt == 5)
+							break;
+						StringBuilder tuple = dbp.generateTuple(dataTypes,
+								isNullables, strt);
+						StringBuilder insertSb = dbp.generateInsertStatement(
+								tuple, tableName);
+
+						try {
+							mStatement.executeUpdate(insertSb.toString());
+							solution.get(t).add(insertSb.toString());
+							// insertedTuples.add(insertSb.toString());
+						} catch (SQLException e) {
+							// System.out
+							// .println("Error: cannot insert tuples into db.");
+						}
 					}
+					// solution.add(insertedTuples);
 				}
-				solution.add(insertedTuples);
 			}
 		}
 		mFound = true;
