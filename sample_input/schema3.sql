@@ -1,0 +1,23 @@
+CREATE TABLE t1 ( 
+  c1   INTEGER     PRIMARY KEY
+, c2   DOUBLE      UNIQUE
+, c3   VARCHAR(5)  NOT NULL
+);
+
+CREATE TABLE t2 ( 
+  c1   INTEGER
+, c2   INTEGER
+, c3   INTEGER
+, c4   INTEGER      NOT NULL
+, c5   INTEGER
+, c6   VARCHAR(5)
+, c7   VARCHAR(5)
+, c8   VARCHAR(5)
+, c9   VARCHAR(5)   NOT NULL
+, c10  VARCHAR(5)
+, c11  DOUBLE       NOT NULL
+, c12  DOUBLE
+, CONSTRAINT pk_t2        PRIMARY KEY (c1, c6, c10)
+, CONSTRAINT uk_t2_c2_c9  UNIQUE (c2, c9)
+, CONSTRAINT uk_t2_c3     UNIQUE (c3)
+);

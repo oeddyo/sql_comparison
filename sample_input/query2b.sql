@@ -1,0 +1,2 @@
+SELECT SUM(c1)/COUNT(*)
+FROM t1

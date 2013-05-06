@@ -69,11 +69,11 @@ public class MainWindow {
 	private JButton mStartMinimalButton;
 	private JButton mCreateSchema;
 	private Vector<String> tablesList;
-	
+
 	private JList mTableList;
-	
+
 	private JPanel tableListPanel;
-	
+
 	/**
 	 * Create the application.
 	 */
@@ -153,15 +153,12 @@ public class MainWindow {
 		mCancelButton.setEnabled(false);
 		mMonteCarloQueryForm.getContentPane().add(mCancelButton);
 
-		
 		mCreateSchema = new JButton("create schema");
-		mCreateSchema.setBounds(550,453,97,25);
+		mCreateSchema.setBounds(550, 453, 97, 25);
 		mCreateSchema.addActionListener(new CreateSchema());
 		mCreateSchema.setEnabled(true);
 		mMonteCarloQueryForm.getContentPane().add(mCreateSchema);
 
-		
-		
 		mOutputTextArea = new JTextArea();
 		mOutputTextArea.setEditable(false);
 		mOutputTextArea.setBounds(22, 506, 500, 150);
@@ -174,20 +171,16 @@ public class MainWindow {
 		mOutputLabel.setBounds(22, 486, 104, 16);
 		mMonteCarloQueryForm.getContentPane().add(mOutputLabel);
 
-
-	    
 		JPanel tableListPanel = new JPanel();
-		tableListPanel.setLayout( new BorderLayout() );
+		tableListPanel.setLayout(new BorderLayout());
 		// Create a new listbox control
-		String	listData[] = 		{"aa","bb", "cccsfddsf"
-		};
-		Vector<String> tmpDataVector = new Vector<String> ();
+		String listData[] = { "aa", "bb", "cccsfddsf" };
+		Vector<String> tmpDataVector = new Vector<String>();
 		tmpDataVector.addAll(Arrays.asList(listData));
 		setPopulatedJList(tmpDataVector);
-		
-		//refer http://www.cs.cf.ac.uk/Dave/HCI/HCI_Handout_CALLER/node143.html
 
-	
+		// refer http://www.cs.cf.ac.uk/Dave/HCI/HCI_Handout_CALLER/node143.html
+
 		// initialize the QueryComparer (& H2 DB)
 		mQueryComparer = new QueryComparer();
 		ReturnValue rv = mQueryComparer.init();
@@ -198,54 +191,49 @@ public class MainWindow {
 			putReturnValueContentsInOutputWindow(rv);
 		}
 	}
-	
-	private void setPopulatedJList(Vector<String> listData){
-		//mMonteCarloQueryForm.getContentPane().remove(mTableList);
+
+	private void setPopulatedJList(Vector<String> listData) {
+		// mMonteCarloQueryForm.getContentPane().remove(mTableList);
 		System.out.println(listData.get(0));
-		 mTableList = new JList(listData);
-		//JList listbox = new JList( listData );
+		mTableList = new JList(listData);
+		// JList listbox = new JList( listData );
 		JPanel tableListPanel = new JPanel();
-		tableListPanel.add( mTableList, BorderLayout.CENTER );
+		tableListPanel.add(mTableList, BorderLayout.CENTER);
 		JScrollPane tableListlScrollPane = new JScrollPane(tableListPanel);
-		tableListlScrollPane.setBounds(560,522,200,80);
-		//mTableList.setBounds(560,522,200,80);
-		tableListlScrollPane.setBounds(560,522,200,80);
-		
-		 mMonteCarloQueryForm.getContentPane().add(tableListlScrollPane);
+		tableListlScrollPane.setBounds(560, 522, 200, 80);
+		// mTableList.setBounds(560,522,200,80);
+		tableListlScrollPane.setBounds(560, 522, 200, 80);
+
+		mMonteCarloQueryForm.getContentPane().add(tableListlScrollPane);
 	}
 
 	/**
 	 * This ActionListener will be called when the user clicks the start button
 	 * 
 	 */
-	
+
 	/*
-	private class ListSelectionListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			// prevent the user from clicking start again
-			mStartMinimalButton.setEnabled(false);
-			// clear any old output
-			mOutputTextArea.setText("");
-
-			// get the schema and queries from their respective textboxes
-			String schema = mSchemaTextArea.getText();
-			mCurrentWorker = mQueryComparer.getCreateSchemaWorker(schema);
-			
-			// create a worker to test these user inputs
-			//mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
-			//		query2, true);
-
-			// set the callback (PropertyChangeListener) for the worker
-			mCurrentWorker.addPropertyChangeListener(mCompareListener);
-
-			// start the worker (executes on a worker thread)
-			mCurrentWorker.execute();
-
-			// allow the user to click the cancel button
-			mCancelButton.setEnabled(true);
-		}
-	}
-	*/
+	 * private class ListSelectionListener implements ActionListener { public
+	 * void actionPerformed(ActionEvent e) { // prevent the user from clicking
+	 * start again mStartMinimalButton.setEnabled(false); // clear any old
+	 * output mOutputTextArea.setText("");
+	 * 
+	 * // get the schema and queries from their respective textboxes String
+	 * schema = mSchemaTextArea.getText(); mCurrentWorker =
+	 * mQueryComparer.getCreateSchemaWorker(schema);
+	 * 
+	 * // create a worker to test these user inputs //mCurrentWorker =
+	 * mQueryComparer.getCompareWorker(schema, query1, // query2, true);
+	 * 
+	 * // set the callback (PropertyChangeListener) for the worker
+	 * mCurrentWorker.addPropertyChangeListener(mCompareListener);
+	 * 
+	 * // start the worker (executes on a worker thread)
+	 * mCurrentWorker.execute();
+	 * 
+	 * // allow the user to click the cancel button
+	 * mCancelButton.setEnabled(true); } }
+	 */
 
 	private class CreateSchema implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
@@ -281,7 +269,7 @@ public class MainWindow {
 			System.out.println(tablesList.get(0));
 
 			setPopulatedJList(tablesList);
-			
+
 		}
 	}
 
@@ -318,10 +306,16 @@ public class MainWindow {
 			String schema = mSchemaTextArea.getText();
 			String query1 = mQuery1TextArea.getText();
 			String query2 = mQuery2TextArea.getText();
+			schema = ReadFile.readFileOrDie("sample_input/schema5.sql");
+			query1 = ReadFile.readFileOrDie("sample_input/query5a.sql");
+			query2 = ReadFile.readFileOrDie("sample_input/query5b.sql");
 
-//			query1 = "SELECT t1.c1 FROM t1 WHERE t1.c2 > ALL (SELECT t2.c2 FROM t2)";
-//			query2 = "SELECT t1.c1 FROM t1 WHERE t1.c2 > (SELECT MAX(t2.c2) FROM t2)";
-//			schema = "CREATE TABLE t1 (c1 DOUBLE,  c2 DOUBLE, ); CREATE TABLE t2 (c1 DOUBLE, c2 DOUBLE,);";
+			// query1 =
+			// "SELECT t1.c1 FROM t1 WHERE t1.c2 > ALL (SELECT t2.c2 FROM t2)";
+			// query2 =
+			// "SELECT t1.c1 FROM t1 WHERE t1.c2 > (SELECT MAX(t2.c2) FROM t2)";
+			// schema =
+			// "CREATE TABLE t1 (c1 DOUBLE,  c2 DOUBLE, ); CREATE TABLE t2 (c1 DOUBLE, c2 DOUBLE,);";
 
 			// create a worker to test these user inputs
 			mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,

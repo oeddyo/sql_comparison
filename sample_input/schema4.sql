@@ -1,0 +1,7 @@
+CREATE TABLE t1 ( 
+  c1   INTEGER
+, c2   INTEGER
+, c3   INTEGER
+, c4   INTEGER
+, c5   INTEGER
+);
