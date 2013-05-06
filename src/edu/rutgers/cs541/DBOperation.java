@@ -207,7 +207,6 @@ public class DBOperation {
 			try {
 				stmt.executeUpdate(insertSb);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

@@ -110,13 +110,14 @@ public class GenerateAndTest extends Thread {
 			// keys
 			// Collections.shuffle(mTableNames);
 			// end
-
+			
+			
 			for (int t = 0; t < mTableNames.size(); t++) {
 				// read and parse the table
 				String tableName = mTableNames.elementAt(t);
 				DBStructure dps = new DBStructure(tableName, mStatement);
-				Vector<Integer> dataTypes = dps.getDataTypes();
-				Vector<Boolean> isNullables = dps.getIsNullables();
+				Vector<Integer> dataTypes = dataTypeVV.get(t);
+				Vector<Boolean> isNullables = isNullableVV.get(t);
 				Vector<String> insertedTuples = new Vector<String>();
 
 				// insert 100 tuples for each table
