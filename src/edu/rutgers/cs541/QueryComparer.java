@@ -196,6 +196,7 @@ public class QueryComparer {
 				Collections.sort(mTableNames);
 			} catch (Exception e) {
 			}
+			Collections.sort(mTableNames);
 			mColumnNames = new Vector<Vector<String>>();
 			for (String tableName : mTableNames) {
 				DBStructure dps = new DBStructure(tableName, mStatement);
