@@ -2,8 +2,11 @@ package edu.rutgers.cs541;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.PrintWriter;
@@ -19,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
@@ -71,8 +75,8 @@ public class MainWindow {
 	private Vector<String> tablesList;
 
 	private JList mTableList;
-
-	private JPanel tableListPanel;
+	private JTable mOutputTable;
+	private JLabel mOutputTableLabel;
 
 	/**
 	 * Create the application.
@@ -91,7 +95,7 @@ public class MainWindow {
 		mMonteCarloQueryForm = new JFrame();
 		mMonteCarloQueryForm.setResizable(true);
 		mMonteCarloQueryForm.setTitle("Monte Carlo Query Comparer");
-		mMonteCarloQueryForm.setBounds(100, 100, 777, 714);
+		mMonteCarloQueryForm.setBounds(100, 100, 1300, 714);
 		mMonteCarloQueryForm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mMonteCarloQueryForm.getContentPane().setLayout(null);
 
@@ -171,13 +175,40 @@ public class MainWindow {
 		mOutputLabel.setBounds(22, 486, 104, 16);
 		mMonteCarloQueryForm.getContentPane().add(mOutputLabel);
 
+		
+		  //String columns[] = {"Name","Age","Gender"};
+	    /*  
+		Object data[][] = {
+	                {"Tom",new Integer(20),"Male"},
+	                {"Tina", new Integer(18), "Female"},
+	                {"Raj",new Integer(19),"Male"}
+	        };
+	      */
+	
+			mOutputTable = new JTable();
+			mOutputTable.setBounds(800, 50, 300,600);
+			mMonteCarloQueryForm.getContentPane().add(mOutputTable);
+
+		mOutputTableLabel = new JLabel("Output Table");
+		mOutputTableLabel.setLabelFor(mOutputTable);
+		mOutputTableLabel.setBounds(800, 10, 150, 50);
+		mMonteCarloQueryForm.getContentPane().add(mOutputTableLabel);
+
+		
+		
+		
 		JPanel tableListPanel = new JPanel();
 		tableListPanel.setLayout(new BorderLayout());
 		// Create a new listbox control
 		String listData[] = { "aa", "bb", "cccsfddsf" };
 		Vector<String> tmpDataVector = new Vector<String>();
 		tmpDataVector.addAll(Arrays.asList(listData));
-		setPopulatedJList(tmpDataVector);
+
+		mTableList = new JList(tmpDataVector);
+		mTableList.setBounds(560,522,200,80);
+		mMonteCarloQueryForm.getContentPane().add(mTableList);
+
+		//setPopulatedJList(tmpDataVector);
 
 		// refer http://www.cs.cf.ac.uk/Dave/HCI/HCI_Handout_CALLER/node143.html
 
@@ -193,18 +224,118 @@ public class MainWindow {
 	}
 
 	private void setPopulatedJList(Vector<String> listData) {
-		// mMonteCarloQueryForm.getContentPane().remove(mTableList);
+		mMonteCarloQueryForm.getContentPane().remove(mTableList);
 		System.out.println(listData.get(0));
+		System.out.println("in set");
 		mTableList = new JList(listData);
+		for(String t: listData)
+		{
+			System.out.println("This is to print data "+t);
+		}
+		
 		// JList listbox = new JList( listData );
-		JPanel tableListPanel = new JPanel();
-		tableListPanel.add(mTableList, BorderLayout.CENTER);
-		JScrollPane tableListlScrollPane = new JScrollPane(tableListPanel);
-		tableListlScrollPane.setBounds(560, 522, 200, 80);
-		// mTableList.setBounds(560,522,200,80);
-		tableListlScrollPane.setBounds(560, 522, 200, 80);
+		//JPanel tableListPanel = new JPanel();
+		//tableListPanel.add(mTableList, BorderLayout.CENTER);
+		//JScrollPane tableListlScrollPane = new JScrollPane(tableListPanel);
+		//tableListlScrollPane.setBounds(560, 522, 200, 80);
+		 mTableList.setBounds(560,522,200,80);
+		//tableListlScrollPane.setBounds(560, 522, 200, 80);
 
-		mMonteCarloQueryForm.getContentPane().add(tableListlScrollPane);
+			mTableList.addMouseListener(new MouseListener() {
+				
+				@Override
+				public void mouseReleased(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void mousePressed(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void mouseExited(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void mouseEntered(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+				}
+				
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					System.out.println(arg0.getPoint());
+					int idx = mTableList.locationToIndex(arg0.getPoint());
+					String tableToShow = (String)mTableList.getModel().getElementAt(idx);
+					System.out.println("table to show is "+tableToShow);
+					//reprint the list here.
+					Vector<String> toShowList = null;
+					try {
+						toShowList = mQueryComparer.getAllTuplesFromTable(tableToShow);
+					} catch (Exception e) {
+						// TODO: handle exception
+						toShowList = null;
+					}
+					//Vector<String> toShowList = mQueryComparer.getAllTuplesFromTable(tableToShow);
+					
+					if(toShowList!=null){
+						String first = toShowList.firstElement();
+						String[] header = first.split(",");
+						String columns[] = header;
+						int numberColumn = columns.length;
+						int numberRow = toShowList.size();
+						/*
+						Object data[][] = {
+								
+						
+						};
+						*/
+						Object [][] data = new Object[numberRow][numberColumn];
+						
+						for(int i = 0; i<numberRow; i++){
+							String[] tmpStrings = toShowList.get(i).split(",");
+			
+							for(int j=0; j<numberColumn; j++){
+								data[i][j] = tmpStrings[j];
+							}
+						
+						}
+						
+						mMonteCarloQueryForm.getContentPane().remove(mOutputTable);
+						
+						for(String t : columns){
+							System.out.println(t);
+						}
+						
+						mOutputTable = new JTable(data, columns);
+						mOutputTable.setBounds(800, 50, 300,600);
+						
+						mMonteCarloQueryForm.getContentPane().add(mOutputTable);
+						mMonteCarloQueryForm.validate();
+						mMonteCarloQueryForm.repaint();
+
+
+						
+						for (String t : toShowList){
+							System.out.println("to show -> "+t);
+							mOutputTextArea.append(t);
+							mOutputTextArea.append(lineSeparator);
+							
+						}
+							
+						
+						
+					}else{
+						mOutputTextArea.setText("Did not perform analyze so no tuples now for table "+tableToShow+" . Analyze first please.");
+					}
+				}
+			});
+		mMonteCarloQueryForm.getContentPane().add(mTableList);
 	}
 
 	/**
@@ -246,8 +377,12 @@ public class MainWindow {
 			for (String tn : tablesList)
 				System.out.println("table: " + tn);
 			System.out.println(tablesList.get(0));
-
 			setPopulatedJList(tablesList);
+			
+			
+			
+			mMonteCarloQueryForm.validate();
+			mMonteCarloQueryForm.repaint();
 
 		}
 	}
@@ -285,11 +420,11 @@ public class MainWindow {
 			String schema = mSchemaTextArea.getText();
 			String query1 = mQuery1TextArea.getText();
 			String query2 = mQuery2TextArea.getText();
-
+			/*
 			schema = ReadFile.readFileOrDie("sample_input/schema5.sql");
 			query1 = ReadFile.readFileOrDie("sample_input/query5a.sql");
 			query2 = ReadFile.readFileOrDie("sample_input/query5b.sql");
-
+			*/
 			// if (schema.equals("") || query1.equals("") || query2.equals(""))
 			// return;
 
@@ -314,10 +449,14 @@ public class MainWindow {
 					e1.printStackTrace();
 				}
 			}
-			Vector<String> allTables = mQueryComparer.getAllTableNames();
+			mStartMinimalButton.setEnabled(true);
+
+			//Vector<String> allTables = mQueryComparer.getAllTableNames();
+			/*
 			for (String t : mQueryComparer.getAllTuplesFromTable(allTables
 					.lastElement()))
 				System.out.println(t);
+			*/
 		}
 	}
 
