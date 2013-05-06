@@ -93,6 +93,7 @@ public class GenerateAndTest extends Thread {
 			DBStructure dps = new DBStructure(tableName, mStatement);
 			Vector<Integer> dataTypes = dps.getDataTypes();
 			Vector<Boolean> isNullables = dps.getIsNullables();
+			// Vector<String> columnNames = dps.getColumnNames();
 			dataTypeVV.add(dataTypes);
 			isNullableVV.add(isNullables);
 		}
@@ -104,6 +105,12 @@ public class GenerateAndTest extends Thread {
 				&& !QueryComparison.bagCompare(mStatement, mQuery1, mQuery2)) {
 			solution.clear();
 			strt.changeIndex();
+
+			// this sentence is very import to make our program pass foreign
+			// keys
+			// Collections.shuffle(mTableNames);
+			// end
+
 			for (int t = 0; t < mTableNames.size(); t++) {
 				// read and parse the table
 				String tableName = mTableNames.elementAt(t);

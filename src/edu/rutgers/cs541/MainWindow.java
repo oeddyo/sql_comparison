@@ -454,9 +454,10 @@ public class MainWindow {
 			//Vector<String> allTables = mQueryComparer.getAllTableNames();
 			/*
 			for (String t : mQueryComparer.getAllTuplesFromTable(allTables
-					.lastElement()))
+					.lastElement())) {
 				System.out.println(t);
 			*/
+			}
 		}
 	}
 

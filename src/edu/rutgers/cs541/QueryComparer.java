@@ -45,6 +45,7 @@ public class QueryComparer {
 	private String mSchema;
 	private String mQuery1;
 	private String mQuery2;
+	private Vector<Vector<String>> mColumnNames;
 
 	/**
 	 * Loads the H2 Driver and initializes a database
@@ -59,6 +60,15 @@ public class QueryComparer {
 		return mTableNames;
 	}
 
+	public Vector<String> getAttributeNamesFromTable(String table) {
+		for (int i = 0; i < mTableNames.size(); i++) {
+			if (table.equals(mTableNames.get(i))) {
+				return mColumnNames.get(i);
+			}
+		}
+		return new Vector<String>();
+	}
+
 	public Vector<String> getAllTuplesFromTable(String table) {
 		Vector<String> res = new Vector<String>();
 		for (int i = 0; i < mTableNames.size(); i++) {
@@ -68,6 +78,7 @@ public class QueryComparer {
 					int right = tuple.indexOf(')');
 					res.add(tuple.substring(left + 1, right));
 				}
+				break;
 			}
 
 		}
@@ -185,6 +196,12 @@ public class QueryComparer {
 				Collections.sort(mTableNames);
 			} catch (Exception e) {
 			}
+			mColumnNames = new Vector<Vector<String>>();
+			for (String tableName : mTableNames) {
+				DBStructure dps = new DBStructure(tableName, mStatement);
+				Vector<String> columnNames = dps.getColumnNames();
+				mColumnNames.add(columnNames);
+			}
 		}
 
 		@Override
@@ -277,8 +294,14 @@ public class QueryComparer {
 					// note that column indexing starts from 1
 					mTableNames.add(rsTab.getString(1));
 				}
-				Collections.sort(mTableNames);
 				rsTab.close();
+				Collections.sort(mTableNames);
+				mColumnNames = new Vector<Vector<String>>();
+				for (String tableName : mTableNames) {
+					DBStructure dps = new DBStructure(tableName, mStatement);
+					Vector<String> columnNames = dps.getColumnNames();
+					mColumnNames.add(columnNames);
+				}
 
 				for (Vector<String> sol : mSolution) {
 					for (String insertSb : sol) {
