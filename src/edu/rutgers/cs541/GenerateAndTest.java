@@ -93,6 +93,7 @@ public class GenerateAndTest extends Thread {
 			DBStructure dps = new DBStructure(tableName, mStatement);
 			Vector<Integer> dataTypes = dps.getDataTypes();
 			Vector<Boolean> isNullables = dps.getIsNullables();
+			// Vector<String> columnNames = dps.getColumnNames();
 			dataTypeVV.add(dataTypes);
 			isNullableVV.add(isNullables);
 		}
