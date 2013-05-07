@@ -582,7 +582,6 @@ public class MainWindow {
 			String schema = mSchemaTextArea.getText();
 			String query1 = mQuery1TextArea.getText();
 			String query2 = mQuery2TextArea.getText();
-			
 			if(query1.length()<6 || query2.length()<6){
 				mOutputTextArea.append(warningMsg+getCurrentTime()+" NO VALID SQL FOUND\n");
 				mStartButton.setEnabled(true);
@@ -605,6 +604,7 @@ public class MainWindow {
 
 			// if (schema.equals("") || query1.equals("") || query2.equals(""))
 			// return;
+			
 
 			// create a worker to test these user inputs
 			
