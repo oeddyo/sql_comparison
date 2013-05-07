@@ -19,6 +19,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -27,6 +29,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -113,6 +117,8 @@ public class MainWindow {
 	private String warningMsg = "WARNING: ";
 	private String logMsg = "Logging: ";
 
+	private JLabel mFlyingCatLabel;
+	
 	private long analyszeTimeUsed;
 	
 	
@@ -288,6 +294,29 @@ public class MainWindow {
 		mTableList = new JList(tmpDataVector);
 		mTableList.setBounds(560,506,180,150);
 		mMonteCarloQueryForm.getContentPane().add(mTableList);
+		
+		
+		/*show gif*/
+		URL url = null;
+		try {
+			url = new URL("http://fmmyriam.files.wordpress.com/2013/01/1280px-nyan_cat.png");
+			//url = new URL("http://25.media.tumblr.com/tumblr_m5cyekI7BM1rwcc6bo1_400.gif");
+			 Icon icon = new ImageIcon(url);
+		     mFlyingCatLabel = new JLabel(icon);
+		     mFlyingCatLabel.setBounds(750, 400, 250, 250);
+		     mMonteCarloQueryForm.getContentPane().add(mFlyingCatLabel);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+     
+        JLabel authorLabel = new JLabel("Authors: Chaolun Xia, Eddie Xie");
+		authorLabel.setBounds(750,300,300,50);
+		mMonteCarloQueryForm.getContentPane().add(authorLabel);
+		
+		
+		
+		
 
 		//setPopulatedJList(tmpDataVector);
 
@@ -321,7 +350,7 @@ public class MainWindow {
 		//tableListPanel.add(mTableList, BorderLayout.CENTER);
 		//JScrollPane tableListlScrollPane = new JScrollPane(tableListPanel);
 		//tableListlScrollPane.setBounds(560, 522, 200, 80);
-		 mTableList.setBounds(560,522,200,80);
+		 mTableList.setBounds(560,522,150,80);
 		//tableListlScrollPane.setBounds(560, 522, 200, 80);
 
 			mTableList.addMouseListener(new MouseListener() {
@@ -424,19 +453,23 @@ public class MainWindow {
 	private class CreateSchema implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// prevent the user from clicking start again
-			System.out.println("in function");
-			mStartButton.setEnabled(true);
-			
-			// clear any old output
-			mOutputTextArea.setText("");
 
 			// get the schema and queries from their respective textboxes
 			String schema = mSchemaTextArea.getText();
-			if(schema.length()<6){
+
+			if(!mQueryComparer.checkSchema(schema)){
 				mOutputTextArea.append(warningMsg+getCurrentTime()+" MAKE SURE CREATE SCHEMA SQL IS CORRECT");
 				return ;
+			}else{
+				mOutputTextArea.setText(logMsg+getCurrentTime()+" create schema");
 			}
+			System.out.println("in function");
+			mStartButton.setEnabled(true);
+			mStartMinimalButton.setEnabled(false);
 			
+			
+			// clear any old output
+
 			mCurrentWorker = mQueryComparer.getCreateSchemaWorker(schema);
 			// create a worker to test these user inputs
 			// mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
@@ -475,7 +508,22 @@ public class MainWindow {
 			mQuery1TextArea.setText("SELECT t1.attr2\n"+"FROM tab1 t1\n"+"WHERE t1.attr1 IN (SELECT t2.attr1 FROM tab2 t2) \n");
 			mQuery2TextArea.setText("SELECT t1.attr2\n"+"FROM tab1 t1\n"+"LEFT JOIN tab2 t2 ON (t1.attr1 = t2.attr1)\n");
 			mSchemaTextArea.setText("CREATE TABLE tab1 (\n"+"attr1      VARCHAR(10)  NOT NULL\n"+", attr2  INTEGER);\n"+"CREATE TABLE tab2 (\n"+"attr1      VARCHAR(10)\n"+", attr2      INTEGER      NOT NULL\n"+", attr3      FLOAT\n"+");");
-			
+			URL url = null;
+			try {
+				url = new URL("http://25.media.tumblr.com/tumblr_m5cyekI7BM1rwcc6bo1_400.gif");
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				return ;
+			}
+			mMonteCarloQueryForm.remove(mFlyingCatLabel);
+	        Icon icon = new ImageIcon(url);
+	        mFlyingCatLabel = new JLabel(icon);
+	        mFlyingCatLabel.setBounds(750, 400, 250, 250);
+	        mMonteCarloQueryForm.getContentPane().add(mFlyingCatLabel);
+	        mMonteCarloQueryForm.validate();
+	        mMonteCarloQueryForm.repaint();
+	        
 		}
 	}
 
@@ -485,7 +533,8 @@ public class MainWindow {
 			// prevent the user from clicking start again
 			// clear any old output
 			// create a worker to test these user inputs
-
+			mStartButton.setEnabled(false);
+			mStartMinimalButton.setEnabled(false);
 			int returnVal = mChooseSchema.showOpenDialog(mChooseSchemaButton);
 			if(returnVal==JFileChooser.APPROVE_OPTION){
 				File file = mChooseSchema.getSelectedFile();
@@ -494,20 +543,24 @@ public class MainWindow {
 			}
 		}
 	}
+	
+	private void doReset(){
+		mOutputTextArea.setText(logMsg+getCurrentTime()+" User reset.\n");
+		mQuery1TextArea.setText("");
+		mQuery2TextArea.setText("");
+		mSchemaTextArea.setText("");
+		mTableList.setListData(new Object[0]); 
+		mStartButton.setEnabled(false);
+		mStartMinimalButton.setEnabled(false);
+		mOutputTable.setModel(new DefaultTableModel());
+	}
 
 	private class ResetActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			// prevent the user from clicking start again
 			// clear any old output
 			// create a worker to test these user inputs
-			mOutputTextArea.setText(logMsg+getCurrentTime()+" User reset.\n");
-			mQuery1TextArea.setText("");
-			mQuery2TextArea.setText("");
-			mSchemaTextArea.setText("");
-			mTableList.setListData(new Object[0]); 
-			mStartButton.setEnabled(false);
-			mStartMinimalButton.setEnabled(false);
-			mOutputTable.setModel(new DefaultTableModel());
+			doReset();
 		}
 	}
 
@@ -516,6 +569,9 @@ public class MainWindow {
 			// prevent the user from clicking start again
 			// clear any old output
 			// create a worker to test these user inputs
+			mStartButton.setEnabled(false);
+			mStartMinimalButton.setEnabled(false);
+
 			int returnVal = mChooseQuery1.showOpenDialog(mChooseQuery1Button);
 			if(returnVal==JFileChooser.APPROVE_OPTION){
 				File file = mChooseQuery1.getSelectedFile();
@@ -531,6 +587,9 @@ public class MainWindow {
 			// prevent the user from clicking start again
 			// clear any old output
 			// create a worker to test these user inputs
+			mStartButton.setEnabled(false);
+			mStartMinimalButton.setEnabled(false);
+
 			int returnVal = mChooseQuery2.showOpenDialog(mChooseQuery2Button);
 			if(returnVal==JFileChooser.APPROVE_OPTION){
 				File file = mChooseQuery2.getSelectedFile();
@@ -589,6 +648,18 @@ public class MainWindow {
 			}else{
 				mOutputTextArea.append(logMsg+getCurrentTime()+" valid SQL found\n");
 			}
+			
+			boolean checkQuery1 = mQueryComparer.checkQuery(schema, query1);
+			boolean checkQuery2 = mQueryComparer.checkQuery(schema, query2);
+
+			
+			if(checkQuery1 && checkQuery2){
+				mOutputTextArea.append(logMsg+getCurrentTime()+" SQL checking passed. \n");
+				mStartButton.setEnabled(true);
+			}else{
+				mOutputTextArea.append(warningMsg+getCurrentTime()+" NO VALID SQL FOUND. Reload SQLs please.\n");
+				return ;
+			}		
 			
 			
 			/*
