@@ -56,6 +56,28 @@ public class QueryComparer {
 	 *         also be returned in the return value
 	 */
 
+	public boolean checkSchema(String schema) {
+		try {
+			mStatement.execute("DROP ALL OBJECTS");
+			RunScript.execute(mConnection, new StringReader(mSchema));
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+
+	public boolean checkQuery(String shehma, String query) {
+		try {
+			mStatement.execute("DROP ALL OBJECTS");
+			RunScript.execute(mConnection, new StringReader(mSchema));
+			Statement stmt = mConnection.createStatement();
+			stmt.executeQuery(query);
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+
 	public Vector<String> getAllTableNames() {
 		return mTableNames;
 	}
