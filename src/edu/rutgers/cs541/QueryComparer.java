@@ -57,19 +57,25 @@ public class QueryComparer {
 	 */
 
 	public boolean checkSchema(String schema) {
+		if (schema.length() < 6) {
+			return false;
+		}
 		try {
 			mStatement.execute("DROP ALL OBJECTS");
-			RunScript.execute(mConnection, new StringReader(mSchema));
+			RunScript.execute(mConnection, new StringReader(schema));
 		} catch (Exception e) {
 			return false;
 		}
 		return true;
 	}
 
-	public boolean checkQuery(String shehma, String query) {
+	public boolean checkQuery(String schema, String query) {
+		if (query.length() < 6 || schema.length() < 6) {
+			return false;
+		}
 		try {
 			mStatement.execute("DROP ALL OBJECTS");
-			RunScript.execute(mConnection, new StringReader(mSchema));
+			RunScript.execute(mConnection, new StringReader(schema));
 			Statement stmt = mConnection.createStatement();
 			stmt.executeQuery(query);
 		} catch (Exception e) {
