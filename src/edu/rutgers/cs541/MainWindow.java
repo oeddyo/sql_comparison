@@ -43,6 +43,7 @@ import javax.swing.SwingWorker;
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Style;
@@ -75,7 +76,8 @@ public class MainWindow {
 
 	private JFrame mMonteCarloQueryForm;
 	private JLabel mSchemaLabel;
-	private JTextArea mSchemaTextArea;
+	//private JTextArea mSchemaTextArea;
+	private JTextPane mSchemaTextArea;
 	private JLabel mQuery1Label;
 	private JTextPane mQuery1TextArea;
 	private JLabel mQuery2Label;
@@ -87,11 +89,15 @@ public class MainWindow {
 	private JButton mStartMinimalButton;
 	private JButton mCreateSchema;
 	private Vector<String> tablesList;
+	
+	private JButton mResetButton;
 
 	private JList mTableList;
 	private JTable mOutputTable;
 	private JLabel mOutputTableLabel;
 	private JScrollPane mOutputTableScrollPane;
+	
+	private JLabel mTableListLabel;
 	
 	
 	private JFileChooser mChooseSchema;
@@ -101,6 +107,8 @@ public class MainWindow {
 	private JButton mChooseSchemaButton;
 	private JButton mChooseQuery1Button;
 	private JButton mChooseQuery2Button;
+	
+	private JButton mFeelingLazyButton;
 
 	private String warningMsg = "WARNING: ";
 	private String logMsg = "Logging: ";
@@ -135,9 +143,10 @@ public class MainWindow {
 		mSchemaLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		mMonteCarloQueryForm.getContentPane().add(mSchemaLabel);
 
-		mSchemaTextArea = new JTextArea();
+		mSchemaTextArea = new JTextPane();
 		mSchemaLabel.setLabelFor(mSchemaTextArea);
 		mSchemaTextArea.setBounds(22, 32, 720, 152);
+		mSchemaTextArea.getDocument().addDocumentListener(new SyntaxHighlighter(mSchemaTextArea));
 		JScrollPane schemaTextAreaScrollPane = new JScrollPane(mSchemaTextArea);
 		schemaTextAreaScrollPane.setBounds(22, 32, 720, 152);
 		mMonteCarloQueryForm.getContentPane().add(schemaTextAreaScrollPane);
@@ -174,40 +183,53 @@ public class MainWindow {
 
 		mStartButton = new JButton("Start Analysis");
 		mStartButton.addActionListener(new StartButtonActionListener());
-		mStartButton.setBounds(150, 453, 122, 25);
+		mStartButton.setBounds(750, 100, 125, 25);
 		mStartButton.setEnabled(false);
 		mMonteCarloQueryForm.getContentPane().add(mStartButton);
 
+		
+		mFeelingLazyButton = new JButton("I'M feeling lazy >_< \n(default sql)");
+		mFeelingLazyButton.addActionListener(new FeelingLazyActionListener());
+		mFeelingLazyButton.setBounds(750, 200, 250, 50);
+		mFeelingLazyButton.setEnabled(true);
+		mMonteCarloQueryForm.getContentPane().add(mFeelingLazyButton);
+		
 		mStartMinimalButton = new JButton("Start Minimal Analysis");
 		mStartMinimalButton.addActionListener(new StartMinimalActionListener());
-		mStartMinimalButton.setBounds(300, 453, 122, 25);
+		mStartMinimalButton.setBounds(750, 140, 250, 25);
 		mStartMinimalButton.setEnabled(false);
 		mMonteCarloQueryForm.getContentPane().add(mStartMinimalButton);
 
 		mCancelButton = new JButton("Cancel");
-		mCancelButton.setBounds(450, 453, 97, 25);
+		mCancelButton.setBounds(880, 100, 125, 25);
 		mCancelButton.addActionListener(new CancelButtonActionListener());
 		mCancelButton.setEnabled(false);
 		mMonteCarloQueryForm.getContentPane().add(mCancelButton);
 
 		mCreateSchema = new JButton("create schema");
-		mCreateSchema.setBounds(550, 453, 97, 25);
+		mCreateSchema.setBounds(750, 60, 125, 25);
 		mCreateSchema.addActionListener(new CreateSchema());
 		mCreateSchema.setEnabled(true);
 		mMonteCarloQueryForm.getContentPane().add(mCreateSchema);
+		
+		mResetButton = new JButton("Reset");
+		mResetButton.setBounds(880,60,125,25);
+		mResetButton.addActionListener(new ResetActionListener());
+		mResetButton.setEnabled(true);
+		mMonteCarloQueryForm.getContentPane().add(mResetButton);
 		
 		/* file chose */
 		
 		mChooseSchema = new JFileChooser();
 		mChooseSchemaButton = new JButton("Open Schema");
-		mChooseSchemaButton.setBounds(70, 8, 122, 25);
+		mChooseSchemaButton.setBounds(80, 10, 122, 25);
 		mChooseSchemaButton.addActionListener(new OpenSchemaActionListener());
 		mMonteCarloQueryForm.getContentPane().add(mChooseSchemaButton);
 
 
 		mChooseQuery1 = new JFileChooser();
 		mChooseQuery1Button = new JButton("Open query1");
-		mChooseQuery1Button.setBounds(70, 190, 122, 25);
+		mChooseQuery1Button.setBounds(70, 190, 125, 25);
 		mChooseQuery1Button.addActionListener(new OpenQuery1ActionListener());
 		mMonteCarloQueryForm.getContentPane().add(mChooseQuery1Button);
 		
@@ -238,28 +260,33 @@ public class MainWindow {
 				
 		};
 		mOutputTable = new JTable(data, columns);
-		mOutputTable.setBounds(800, 50, 300,600);
+		mOutputTable.setBounds(1025, 23, 250,600);
 		mOutputTableScrollPane = new JScrollPane(mOutputTable);
-		mOutputTableScrollPane.setBounds(800, 50, 300,600);
+		mOutputTableScrollPane.setBounds(1025, 23, 250,600);
 	
 		//mMonteCarloQueryForm.getContentPane().add(mOutputTable.getTableHeader(),BorderLayout.PAGE_START);
 		mMonteCarloQueryForm.getContentPane().add(mOutputTableScrollPane);
 
 		mOutputTableLabel = new JLabel("Output Table");
 		mOutputTableLabel.setLabelFor(mOutputTable);
-		mOutputTableLabel.setBounds(800, 10, 150, 50);
+		mOutputTableLabel.setBounds(1025,10,250,15);
 		mMonteCarloQueryForm.getContentPane().add(mOutputTableLabel);
 		
 		
 		JPanel tableListPanel = new JPanel();
 		tableListPanel.setLayout(new BorderLayout());
 		// Create a new listbox control
-		String listData[] = { "aa", "bb", "cccsfddsf" };
+		mTableListLabel = new JLabel("Tables");
+		mTableListLabel.setLabelFor(tableListPanel);
+		mTableListLabel.setBounds(560,486,180,16);
+		mMonteCarloQueryForm.getContentPane().add(mTableListLabel);
+
+		String listData[] = { ""};
 		Vector<String> tmpDataVector = new Vector<String>();
 		tmpDataVector.addAll(Arrays.asList(listData));
 
 		mTableList = new JList(tmpDataVector);
-		mTableList.setBounds(560,522,200,80);
+		mTableList.setBounds(560,506,180,150);
 		mMonteCarloQueryForm.getContentPane().add(mTableList);
 
 		//setPopulatedJList(tmpDataVector);
@@ -368,9 +395,9 @@ public class MainWindow {
 						
 						mOutputTable = new JTable(data, columns);
 						
-						mOutputTable.setBounds(800, 50, 300,600);
+						mOutputTable.setBounds(1025,30,250,15);
 						mOutputTableScrollPane = new JScrollPane(mOutputTable);
-						mOutputTableScrollPane.setBounds(800, 50, 300,600);
+						mOutputTableScrollPane.setBounds(1025,30,250,600);
 						mMonteCarloQueryForm.getContentPane().add(mOutputTableScrollPane);
 						
 						mMonteCarloQueryForm.validate();
@@ -405,6 +432,11 @@ public class MainWindow {
 
 			// get the schema and queries from their respective textboxes
 			String schema = mSchemaTextArea.getText();
+			if(schema.length()<6){
+				mOutputTextArea.append(warningMsg+getCurrentTime()+" MAKE SURE CREATE SCHEMA SQL IS CORRECT");
+				return ;
+			}
+			
 			mCurrentWorker = mQueryComparer.getCreateSchemaWorker(schema);
 			// create a worker to test these user inputs
 			// mCurrentWorker = mQueryComparer.getCompareWorker(schema, query1,
@@ -436,6 +468,17 @@ public class MainWindow {
 
 		}
 	}
+	
+	
+	private class FeelingLazyActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			mQuery1TextArea.setText("SELECT t1.attr2\n"+"FROM tab1 t1\n"+"WHERE t1.attr1 IN (SELECT t2.attr1 FROM tab2 t2) \n");
+			mQuery2TextArea.setText("SELECT t1.attr2\n"+"FROM tab1 t1\n"+"LEFT JOIN tab2 t2 ON (t1.attr1 = t2.attr1)\n");
+			mSchemaTextArea.setText("CREATE TABLE tab1 (\n"+"attr1      VARCHAR(10)  NOT NULL\n"+", attr2  INTEGER);\n"+"CREATE TABLE tab2 (\n"+"attr1      VARCHAR(10)\n"+", attr2      INTEGER      NOT NULL\n"+", attr3      FLOAT\n"+");");
+			
+		}
+	}
+
 
 	private class OpenSchemaActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
@@ -449,6 +492,22 @@ public class MainWindow {
 				String schema = ReadFile.readFileOrDie(file.getPath());
 				mSchemaTextArea.setText(schema);
 			}
+		}
+	}
+
+	private class ResetActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			// prevent the user from clicking start again
+			// clear any old output
+			// create a worker to test these user inputs
+			mOutputTextArea.setText(logMsg+getCurrentTime()+" User reset.\n");
+			mQuery1TextArea.setText("");
+			mQuery2TextArea.setText("");
+			mSchemaTextArea.setText("");
+			mTableList.setListData(new Object[0]); 
+			mStartButton.setEnabled(false);
+			mStartMinimalButton.setEnabled(false);
+			mOutputTable.setModel(new DefaultTableModel());
 		}
 	}
 
@@ -523,7 +582,6 @@ public class MainWindow {
 			String schema = mSchemaTextArea.getText();
 			String query1 = mQuery1TextArea.getText();
 			String query2 = mQuery2TextArea.getText();
-<<<<<<< HEAD
 			
 			if(query1.length()<6 || query2.length()<6){
 				mOutputTextArea.append(warningMsg+getCurrentTime()+" NO VALID SQL FOUND\n");
@@ -538,14 +596,13 @@ public class MainWindow {
 			schema = ReadFile.readFileOrDie("sample_input/schema5.sql");
 			query1 = ReadFile.readFileOrDie("sample_input/query5a.sql");
 			query2 = ReadFile.readFileOrDie("sample_input/query5b.sql");
-			*/
-=======
+			
 
 			schema = ReadFile.readFileOrDie("sample_input/schema6.sql");
 			query1 = ReadFile.readFileOrDie("sample_input/query6a.sql");
 			query2 = ReadFile.readFileOrDie("sample_input/query6b.sql");
+			*/
 
->>>>>>> a053cda99339c68fac7ba78e7fd1f1c109279dfa
 			// if (schema.equals("") || query1.equals("") || query2.equals(""))
 			// return;
 
@@ -565,7 +622,7 @@ public class MainWindow {
 			
 			while (!mCurrentWorker.isDone()) {
 				try {
-					Thread.sleep(10);
+					Thread.sleep(100);
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
